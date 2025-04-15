@@ -2,7 +2,7 @@ package com.example.Hospital.security.config;
 
 
 
-import com.example.security.token.TokenRepository;
+import com.example.Hospital.security.token.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -2,8 +2,8 @@ package com.example.Hospital.security.config;
 
 
 
-import com.example.security.auditing.ApplicationAuditAware;
-import com.example.security.user.UserRepository;
+import com.example.Hospital.security.auditing.ApplicationAuditAware;
+import com.example.Hospital.security.user.UserRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
