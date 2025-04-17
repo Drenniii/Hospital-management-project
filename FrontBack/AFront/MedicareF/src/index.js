@@ -1,5 +1,4 @@
 /*!
-
 =========================================================
 * Light Bootstrap Dashboard React - v2.0.1
 =========================================================
@@ -9,11 +8,9 @@
 * Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard-react/blob/master/LICENSE.md)
 
 * Coded by Creative Tim
-
 =========================================================
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
 */
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -27,6 +24,7 @@ import "./assets/css/demo.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import AdminLayout from "layouts/Admin.js";
+import LandingPage from "views/LandingPage"; // KJO u shtua
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -34,7 +32,8 @@ root.render(
   <BrowserRouter>
     <Switch>
       <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
-      <Redirect from="/" to="/admin/dashboard" />
+      <Route path="/home" component={LandingPage} /> {/* KJO u shtua */}
+      <Redirect exact from="/" to="/home" /> {/* KJO ndryshon redirect-in */}
     </Switch>
   </BrowserRouter>
 );

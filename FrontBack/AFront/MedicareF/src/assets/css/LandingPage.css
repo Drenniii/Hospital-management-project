@@ -1,0 +1,40 @@
+/* Kjo siguron që nuk ka rrëshqitje horizontale */
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+}
+
+.container, .container-fluid {
+    width: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.section {
+    padding: 4rem 0;
+  }
+  
+  /* Backgrounds për çdo section */
+  .section-hero {
+    background-color: #f8f9fa;
+  }
+  
+  .section-info {
+    background-color: #eaf7f7;
+    /* #333333 */
+  }
+  
+  .section-stats {
+    background-color: #f0f8ff;
+    /* #f0f8ff */
+  }
+  
+  .section-therapists {
+    background-color: #d6eaf8;
+  }
+  
+  .section-compare {
+    background-color: #e8e6ff;
+  }
+  
