@@ -2,7 +2,7 @@ package com.example.Hospital.security.config;
 
 
 
-import com.alibou.security.token.TokenRepository;
+import com.example.Hospital.security.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
