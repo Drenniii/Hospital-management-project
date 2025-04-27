@@ -105,7 +105,7 @@ const SignUp = () => {
             <button type="submit" className="btn btn-primary w-100 mt-4">Sign Up</button>
           </form>
           <div className="mt-3 text-center">
-            <small className="text-muted">Already have an account? <a href="/signin">Sign In</a></small>
+            <small className="text-muted">Already have an account? <a href="/login">Log In</a></small>
           </div>
         </div>
       </div>
