@@ -25,6 +25,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import AdminLayout from "layouts/Admin.js";
 import LandingPage from "views/LandingPage"; // KJO u shtua
+import SignUp from "views/SignUp";   // KJO u shtua
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -33,6 +34,7 @@ root.render(
     <Switch>
       <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
       <Route path="/home" component={LandingPage} /> {/* KJO u shtua */}
+      <Route path="/signUp" component={SignUp} /> {/* KJO u shtua */}
       <Redirect exact from="/" to="/home" /> {/* KJO ndryshon redirect-in */}
     </Switch>
   </BrowserRouter>
