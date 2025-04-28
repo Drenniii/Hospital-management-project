@@ -1,32 +1,15 @@
-/*!
-
-=========================================================
-* Light Bootstrap Dashboard React - v2.0.1
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/light-bootstrap-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { useLocation, NavLink } from "react-router-dom";
-
 import { Nav } from "react-bootstrap";
-
-import logo from "assets/img/reactlogo.png";
 
 function Sidebar({ color, image, routes }) {
   const location = useLocation();
+  const [openTypography, setOpenTypography] = useState(false);
+
   const activeRoute = (routeName) => {
     return location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
+
   return (
     <div className="sidebar" data-image={image} data-color={color}>
       <div
@@ -51,26 +34,61 @@ function Sidebar({ color, image, routes }) {
         </div>
         <Nav>
           {routes.map((prop, key) => {
-            if (!prop.redirect)
-              return (
-                <li
-                  className={
-                    prop.upgrade
-                      ? "active active-pro"
-                      : activeRoute(prop.layout + prop.path)
-                  }
-                  key={key}
-                >
-                  <NavLink
-                    to={prop.layout + prop.path}
-                    className="nav-link"
-                    activeClassName="active"
+            if (!prop.redirect) {
+              if (prop.name === "Typography") {
+                // KETU bejme Dropdown special per Typography
+                return (
+                  <li className="nav-item" key={key}>
+                    <div
+                      className="nav-link"
+                      onClick={() => setOpenTypography(!openTypography)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className={prop.icon} />
+                      <p>
+                        {prop.name}
+                        <b className="caret"></b>
+                      </p>
+                    </div>
+                    {openTypography && (
+                      <ul className="nav flex-column ml-3">
+                        <li className="nav-item">
+                          <NavLink to="/admin/terapisti" className="nav-link" activeClassName="active">
+                            Shiko Terapistët
+                          </NavLink>
+                        </li>
+                        <li className="nav-item">
+                          <NavLink to="/admin/nutricisti" className="nav-link" activeClassName="active">
+                            Shiko Nutricistët
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
+                );
+              } else {
+                // Normal rresht per rruget tjera
+                return (
+                  <li
+                    className={
+                      prop.upgrade
+                        ? "active active-pro"
+                        : activeRoute(prop.layout + prop.path)
+                    }
+                    key={key}
                   >
-                    <i className={prop.icon} />
-                    <p>{prop.name}</p>
-                  </NavLink>
-                </li>
-              );
+                    <NavLink
+                      to={prop.layout + prop.path}
+                      className="nav-link"
+                      activeClassName="active"
+                    >
+                      <i className={prop.icon} />
+                      <p>{prop.name}</p>
+                    </NavLink>
+                  </li>
+                );
+              }
+            }
             return null;
           })}
         </Nav>
