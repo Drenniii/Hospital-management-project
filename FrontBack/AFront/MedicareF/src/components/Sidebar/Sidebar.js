@@ -70,11 +70,7 @@ function Sidebar({ color, image, routes }) {
                 // Normal rresht per rruget tjera
                 return (
                   <li
-                    className={
-                      prop.upgrade
-                        ? "active active-pro"
-                        : activeRoute(prop.layout + prop.path)
-                    }
+                    className={activeRoute(prop.layout + prop.path)}
                     key={key}
                   >
                     <NavLink
