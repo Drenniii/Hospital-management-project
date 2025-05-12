@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useHistory } from 'react-router-dom';  // Import useHistory for v5
 import Footer from './Footer';
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
     password: ''
   });
   const [errors, setErrors] = useState({});
+  const history = useHistory(); // Hook to navigate
 
   const handleChange = (e) => {
     setFormData(prev => ({
@@ -23,15 +25,18 @@ const Login = () => {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
       setErrors({});
-      // Submit logic
+      // Add your login API call here
       console.log('Logging in with:', formData);
+      
+      // On successful login, navigate to /admin
+      history.push('/admin');
     }
   };
 
