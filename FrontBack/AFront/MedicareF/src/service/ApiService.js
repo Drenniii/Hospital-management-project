@@ -20,7 +20,7 @@ export default class ApiService {
   }
 
   static async loginUser(loginDetails) {
-    const response = await axios.post(`${this.BASE_URL}/api/v1//auth/authenticate`, loginDetails, {
+    const response = await axios.post(`${this.BASE_URL}/api/v1/auth/authenticate`, loginDetails, {
       withCredentials: true // important for sending cookies
     });
     return response.data;
@@ -31,6 +31,9 @@ export default class ApiService {
       withCredentials: true
     });
     return response.data;
+
+
+    
   }
 }
 
