@@ -12,9 +12,14 @@
 
 import Dashboard from "views/Dashboard.js";
 import UserProfile from "views/UserProfile.js";
-import TableList from "views/TableList.js";
-import Typography from "views/Typography.js";
+import TableList from "views/Terapisti/TableList.js";
+import Typography from "views/User/Typography.js";
 import Notifications from "views/Notifications.js";
+
+// Merr rolin nga localStorage
+const getUserRole = () => {
+  return localStorage.getItem("userRole"); // Shembull: "admin", "terapist", "user"
+};
 
 const dashboardRoutes = [
   {
@@ -38,13 +43,20 @@ const dashboardRoutes = [
     component: TableList,
     layout: "/admin"
   },
-  {
-    path: "/typography",
-    name: "Typography",
-    icon: "nc-icon nc-paper-2",
-    component: Typography,
-    layout: "/admin"
-  },
+  // Shfaq Typography vetëm nëse përdoruesi nuk është terapist
+  ...(
+    getUserRole() !== "terapist"
+      ? [
+          {
+            path: "/typography",
+            name: "Typography",
+            icon: "nc-icon nc-paper-2",
+            component: Typography,
+            layout: "/admin"
+          }
+        ]
+      : []
+  ),
   {
     path: "/notifications",
     name: "Notifications",
