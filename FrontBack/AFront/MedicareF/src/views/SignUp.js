@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useHistory } from 'react-router-dom'; // Import useHistory for navigation
 import Footer from './Footer';
+import ApiService from 'service/ApiService';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ const SignUp = () => {
     password: ''
   });
   const [errors, setErrors] = useState({});
+  const history = useHistory(); // Hook to navigate
 
   const handleChange = (e) => {
     setFormData(prev => ({
@@ -27,15 +30,22 @@ const SignUp = () => {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
       setErrors({});
-      // Submit logic
-      console.log('Signing up with:', formData);
+      // Call your API service to handle signup
+      try {
+        const response = await ApiService.registerUser(formData); // Assuming you have a signUp method in ApiService
+        console.log('Sign up successful:', response);
+        history.push('/login'); // Redirect to login page on success
+      } catch (error) {
+        console.error('Error signing up:', error);
+        setErrors({ general: 'Signup failed. Please try again.' });
+      }
     }
   };
 
@@ -102,6 +112,7 @@ const SignUp = () => {
               />
               {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </div>
+            {errors.general && <div className="text-danger text-center">{errors.general}</div>}
             <button type="submit" className="btn btn-primary w-100 mt-4">Sign Up</button>
           </form>
           <div className="mt-3 text-center">
