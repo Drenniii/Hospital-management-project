@@ -41,6 +41,14 @@ export default class ApiService {
     });
     return response.data;
   }
+  
+  static async logoutUser() {
+  const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, {
+    headers: this.getHeader()
+  });
+  return response.data;
+}
+
 }
 
 

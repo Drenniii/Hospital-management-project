@@ -1,32 +1,29 @@
-/*!
-
-=========================================================
-* Light Bootstrap Dashboard React - v2.0.1
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/light-bootstrap-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import React, { Component } from "react";
-import { useLocation } from "react-router-dom";
+import React from "react";
+import { useLocation, useHistory } from "react-router-dom"; // ✅ useHistory for v5
 import { Navbar, Container, Nav, Dropdown, Button } from "react-bootstrap";
-
 import routes from "routes.js";
+import ApiService from "../../service/ApiService";  // ✅ Adjust path based on your folder structure
 
 function Header() {
   const location = useLocation();
+  const history = useHistory(); // ✅ useHistory instead of useNavigate
+
+  // ✅ Logout handler
+  const handleLogout = async () => {
+    console.log("Logout clicked");
+    try {
+      await ApiService.logoutUser();
+      localStorage.removeItem("accessToken");
+      history.push("/login"); // ✅ redirect using history for v5
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const mobileSidebarToggle = (e) => {
     e.preventDefault();
     document.documentElement.classList.toggle("nav-open");
-    var node = document.createElement("div");
+    const node = document.createElement("div");
     node.id = "bodyClick";
     node.onclick = function () {
       this.parentElement.removeChild(this);
@@ -43,6 +40,7 @@ function Header() {
     }
     return "Brand";
   };
+
   return (
     <Navbar bg="light" expand="lg">
       <Container fluid>
@@ -71,7 +69,6 @@ function Header() {
           <Nav className="nav mr-auto" navbar>
             <Nav.Item>
               <Nav.Link
-                data-toggle="dropdown"
                 href="#pablo"
                 onClick={(e) => e.preventDefault()}
                 className="m-0"
@@ -83,7 +80,6 @@ function Header() {
             <Dropdown as={Nav.Item}>
               <Dropdown.Toggle
                 as={Nav.Link}
-                data-toggle="dropdown"
                 id="dropdown-67443507"
                 variant="default"
                 className="m-0"
@@ -93,44 +89,25 @@ function Header() {
                 <span className="d-lg-none ml-1">Notification</span>
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Notification 1
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Notification 2
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Notification 3
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Notification 4
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Another notification
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
             <Nav.Item>
-              <Nav.Link
-                className="m-0"
-                href="#pablo"
-                onClick={(e) => e.preventDefault()}
-              >
+              <Nav.Link className="m-0" href="#pablo" onClick={(e) => e.preventDefault()}>
                 <i className="nc-icon nc-zoom-split"></i>
                 <span className="d-lg-block"> Search</span>
               </Nav.Link>
@@ -138,11 +115,7 @@ function Header() {
           </Nav>
           <Nav className="ml-auto" navbar>
             <Nav.Item>
-              <Nav.Link
-                className="m-0"
-                href="#pablo"
-                onClick={(e) => e.preventDefault()}
-              >
+              <Nav.Link className="m-0" href="#pablo" onClick={(e) => e.preventDefault()}>
                 <span className="no-icon">Account</span>
               </Nav.Link>
             </Nav.Item>
@@ -151,52 +124,41 @@ function Header() {
                 aria-expanded={false}
                 aria-haspopup={true}
                 as={Nav.Link}
-                data-toggle="dropdown"
                 id="navbarDropdownMenuLink"
                 variant="default"
                 className="m-0"
               >
                 <span className="no-icon">Dropdown</span>
               </Dropdown.Toggle>
-              <Dropdown.Menu aria-labelledby="navbarDropdownMenuLink">
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+              <Dropdown.Menu>
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Action
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Another action
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Something
                 </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Something else here
                 </Dropdown.Item>
                 <div className="divider"></div>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
                   Separated link
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+
+            {/* ✅ LOGOUT BUTTON */}
             <Nav.Item>
               <Nav.Link
                 className="m-0"
-                href="#pablo"
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogout();
+                }}
+                style={{ cursor: "pointer" }}
               >
                 <span className="no-icon">Log out</span>
               </Nav.Link>
