@@ -26,14 +26,20 @@ export default class ApiService {
     return response.data;
   }
 
+
   static async refreshToken() {
-    const response = await axios.post(`${this.BASE_URL}/api/v1//auth/refresh-token`, {}, {
+    const response = await axios.post(`${this.BASE_URL}/api/v1/auth/refresh-token`, {}, {
       withCredentials: true
     });
     return response.data;
+}
 
 
-    
+  static async getAllUsers() {
+    const response = await axios.get(`${this.BASE_URL}/api/v1/users/get`, {
+      headers: this.getHeader()
+    });
+    return response.data;
   }
 }
 

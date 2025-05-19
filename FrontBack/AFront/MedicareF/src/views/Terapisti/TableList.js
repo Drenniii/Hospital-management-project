@@ -1,35 +1,35 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Card, Table, Container, Row, Col, Button, Spinner, Alert, Modal } from "react-bootstrap";
+import ApiService from "service/ApiService";
 
 function TableList() {
-  const [klientet, setKlientet] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedKlient, setSelectedKlient] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    axios.get("/api/terapist/klientet")
-      .then(res => {
-        setKlientet(res.data);
+    ApiService.getAllUsers()
+      .then((data) => {
+        setUsers(data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error("Gabim:", err);
-        setError("Nuk mund të ngarkohen të dhënat e klientëve.");
+      .catch((err) => {
+        console.error("Error:", err.response ? err.response.data : err.message);
+        setError("Nuk mund të ngarkohen të dhënat e përdoruesve.");
         setLoading(false);
       });
   }, []);
 
-  const handleShowModal = (klient) => {
-    setSelectedKlient(klient);
+  const handleShowModal = (user) => {
+    setSelectedUser(user);
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedKlient(null);
+    setSelectedUser(null);
   };
 
   return (
@@ -38,7 +38,7 @@ function TableList() {
         <Col md="12">
           <Card>
             <Card.Header className="bg-primary text-white">
-              <Card.Title as="h4" className="mb-0">Klientët e mi</Card.Title>
+              <Card.Title as="h4" className="mb-0">Përdoruesit</Card.Title>
             </Card.Header>
             <Card.Body>
               {loading ? (
@@ -47,27 +47,29 @@ function TableList() {
                 </div>
               ) : error ? (
                 <Alert variant="danger">{error}</Alert>
-              ) : klientet.length > 0 ? (
+              ) : users.length > 0 ? (
                 <Table striped bordered hover responsive>
                   <thead className="table-dark">
                     <tr>
                       <th>#</th>
                       <th>Emri</th>
                       <th>Mbiemri</th>
+                      <th>Email</th>
                       <th>Detaje</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {klientet.map((klient, index) => (
-                      <tr key={klient.id}>
+                    {users.map((user, index) => (
+                      <tr key={user.id}>
                         <td>{index + 1}</td>
-                        <td>{klient.emri}</td>
-                        <td>{klient.mbiemri}</td>
+                        <td>{user.firstname}</td>
+                        <td>{user.lastname}</td>
+                        <td>{user.email}</td>
                         <td>
                           <Button
                             variant="info"
                             size="sm"
-                            onClick={() => handleShowModal(klient)}
+                            onClick={() => handleShowModal(user)}
                           >
                             Shiko
                           </Button>
@@ -77,25 +79,24 @@ function TableList() {
                   </tbody>
                 </Table>
               ) : (
-                <Alert variant="info">Nuk ka klientë për t'u shfaqur.</Alert>
+                <Alert variant="info">Nuk ka përdorues për t'u shfaqur.</Alert>
               )}
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {/* Modal për shfaqjen e detajeve të klientit */}
+      {/* Modal për shfaqjen e detajeve të përdoruesit */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Detajet e Klientit</Modal.Title>
+          <Modal.Title>Detajet e Përdoruesit</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {selectedKlient && (
+          {selectedUser && (
             <>
-              <p><strong>Emri:</strong> {selectedKlient.emri}</p>
-              <p><strong>Mbiemri:</strong> {selectedKlient.mbiemri}</p>
-              <p><strong>Email:</strong> {selectedKlient.email}</p>
-              <p><strong>Telefon:</strong> {selectedKlient.telefon}</p>
+              <p><strong>Emri:</strong> {selectedUser.firstname}</p>
+              <p><strong>Mbiemri:</strong> {selectedUser.lastname}</p>
+              <p><strong>Email:</strong> {selectedUser.email}</p>
             </>
           )}
         </Modal.Body>
