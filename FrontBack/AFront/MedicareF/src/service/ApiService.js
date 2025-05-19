@@ -52,7 +52,12 @@ export default class ApiService {
 
 
 static async updateUser(id, updatedUserData) {
-  const response = await axios.put(`${this.BASE_URL}/api/v1/users/${id}`, updatedUserData, {
+  const response = await axios.put(`${this.BASE_URL}/api/v1/users/${id}`, updatedUserData, {headers: this.getHeader()
+  });
+  return response.data; }
+  
+  static async logoutUser() {
+  const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, {
     headers: this.getHeader()
   });
   return response.data;
