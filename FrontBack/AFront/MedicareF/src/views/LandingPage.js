@@ -3,8 +3,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../assets/css/LandingPage.css';
 import Header from './Header';
 import Footer from './Footer';
+import { useHistory } from 'react-router-dom';
+
 
 export default function LandingPage() {
+   const history = useHistory();
+
+const handleRedirect = () => {
+  history.push('/login');
+};
+
+
     return (
         <>
             <Header />
@@ -21,7 +30,7 @@ export default function LandingPage() {
                                 <div className="card h-100 shadow-sm">
                                     <div className="card-body">
                                         <h4 className="card-title">Individual</h4>
-                                        <a href="/get-started" className="btn btn-primary mt-2">For myself →</a>
+                                        <button onClick={handleRedirect} className="btn btn-primary mt-2">For myself →</button>
                                     </div>
                                 </div>
                             </div>
@@ -29,7 +38,7 @@ export default function LandingPage() {
                                 <div className="card h-100 shadow-sm">
                                     <div className="card-body">
                                         <h4 className="card-title">Couples</h4>
-                                        <a href="/get-started" className="btn btn-primary mt-2">For me and my partner →</a>
+                                        <button onClick={handleRedirect} className="btn btn-primary mt-2">For me and my partner →</button>
                                     </div>
                                 </div>
                             </div>
@@ -37,7 +46,7 @@ export default function LandingPage() {
                                 <div className="card h-100 shadow-sm">
                                     <div className="card-body">
                                         <h4 className="card-title">Teen</h4>
-                                        <a href="/get-started" className="btn btn-primary mt-2">For my child →</a>
+                                        <button onClick={handleRedirect} className="btn btn-primary mt-2">For my child →</button>
                                     </div>
                                 </div>
                             </div>
@@ -110,7 +119,7 @@ export default function LandingPage() {
                                 </p>
                             </div>
                             <div className="col-12 col-md-4 text-center">
-                                <a href="/get-started" className="btn btn-success btn-lg py-3 px-5 fw-bold">Get matched to a therapist</a>
+                                <button onClick={handleRedirect} className="btn btn-success btn-lg py-3 px-5 fw-bold">Get matched to a therapist</button>
                             </div>
                         </div>
                     </div>
