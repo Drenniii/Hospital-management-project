@@ -9,12 +9,10 @@
 =========================================================
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-
-
-
 
 // Importo Bootstrap CSS dhe JS
 import "bootstrap/dist/css/bootstrap.min.css";  // CSS
@@ -30,7 +28,8 @@ import AdminLayout from "layouts/Admin.js";
 import LandingPage from "views/LandingPage";
 import SignUp from "views/SignUp";
 import Login from "views/Login";
-import ForgotPassword from "views/ForgotPassword"; // Shto komponentin ForgotPassword
+import ForgotPassword from "views/ForgotPassword";
+import AdminDashboard from "views/Admin/AdminDashboard"; // ✅ Importo AdminDashboard
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -41,7 +40,8 @@ root.render(
       <Route path="/home" component={LandingPage} />
       <Route path="/signUp" component={SignUp} />
       <Route path="/login" component={Login} />
-      <Route path="/forgot-password" component={ForgotPassword} /> {/* Kjo është rruga për ForgotPassword */}
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/adminDashboard" component={AdminDashboard} /> {/* ✅ Rruga për AdminDashboard */}
       <Redirect exact from="/" to="/home" />
     </Switch>
   </BrowserRouter>

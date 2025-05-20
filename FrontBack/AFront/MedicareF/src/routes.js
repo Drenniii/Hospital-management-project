@@ -15,6 +15,7 @@ import UserProfile from "views/UserProfile.js";
 import TableList from "views/Terapisti/TableList.js";
 import Typography from "views/User/Typography.js";
 import Notifications from "views/Notifications.js";
+import AdminDashboard from "views/Admin/AdminDashboard.js"; // ✅ Importo komponentin e ri
 
 // Merr rolin nga localStorage
 const getUserRole = () => {
@@ -43,26 +44,28 @@ const dashboardRoutes = [
     component: TableList,
     layout: "/admin"
   },
-  // Shfaq Typography vetëm nëse përdoruesi nuk është terapist
-  ...(
-    getUserRole() !== "terapist"
-      ? [
-          {
-            path: "/typography",
-            name: "Typography",
-            icon: "nc-icon nc-paper-2",
-            component: Typography,
-            layout: "/admin"
-          }
-        ]
-      : []
-  ),
+  {
+    path: "/typography",
+    name: "Typography",
+    icon: "nc-icon nc-paper-2",
+    component: Typography,
+    layout: "/admin",
+    role: "NON-THERAPIST"
+  },
   {
     path: "/notifications",
     name: "Notifications",
     icon: "nc-icon nc-bell-55",
     component: Notifications,
     layout: "/admin"
+  },
+  {
+    path: "/adminDashboard",
+    name: "Admin Dashboard",
+    icon: "nc-icon nc-settings-gear-65",
+    component: AdminDashboard,
+    layout: "/admin",
+    role: "ADMIN"
   }
 ];
 

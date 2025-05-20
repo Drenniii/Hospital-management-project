@@ -7,14 +7,14 @@
 * Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard-react/blob/master/LICENSE.md)
 * Coded by Creative Tim
 =========================================================
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import React, { Component } from "react";
+
+import React from "react";
 import { useLocation, Route, Switch } from "react-router-dom";
 
-import AdminNavbar from "components/Navbars/AdminNavbar";
-import Footer from "components/Footer/Footer";
-import Sidebar from "components/Sidebar/Sidebar";
+import AdminNavbar from "components/Navbars/AdminNavbar.js";
+import Footer from "components/Footer/Footer.js";
+import Sidebar from "components/Sidebar/Sidebar.js"; // ✅ Importi i saktë
 
 import routes from "routes.js";
 
@@ -37,39 +37,41 @@ function Admin() {
             key={key}
           />
         );
-      } else {
-        return null;
       }
+      return null;
     });
   };
 
   React.useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
-    mainPanel.current.scrollTop = 0;
+    if (mainPanel.current) {
+      mainPanel.current.scrollTop = 0;
+    }
+
     if (
       window.innerWidth < 993 &&
       document.documentElement.className.indexOf("nav-open") !== -1
     ) {
       document.documentElement.classList.toggle("nav-open");
-      var element = document.getElementById("bodyClick");
-      element.parentNode.removeChild(element);
+      const element = document.getElementById("bodyClick");
+      if (element) {
+        element.parentNode.removeChild(element);
+      }
     }
   }, [location]);
 
   return (
-    <>
-      <div className="wrapper">
-        <Sidebar color={color} image={hasImage ? image : ""} routes={routes} />
-        <div className="main-panel" ref={mainPanel}>
-          <AdminNavbar />
-          <div className="content">
-            <Switch>{getRoutes(routes)}</Switch>
-          </div>
-          <Footer />
+    <div className="wrapper">
+      <Sidebar color={color} image={hasImage ? image : ""} routes={routes} />
+      <div className="main-panel" ref={mainPanel}>
+        <AdminNavbar />
+        <div className="content">
+          <Switch>{getRoutes(routes)}</Switch>
         </div>
+        <Footer />
       </div>
-    </>
+    </div>
   );
 }
 

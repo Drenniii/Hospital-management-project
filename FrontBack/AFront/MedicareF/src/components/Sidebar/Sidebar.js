@@ -1,10 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, NavLink } from "react-router-dom";
 import { Nav } from "react-bootstrap";
 
 function Sidebar({ color, image, routes }) {
   const location = useLocation();
   const [openTypography, setOpenTypography] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.role) {
+      setRole(user.role.toUpperCase()); // sigurohemi që roli të jetë uppercase
+    }
+  }, []);
 
   const activeRoute = (routeName) => {
     return location.pathname.indexOf(routeName) > -1 ? "active" : "";
@@ -14,9 +22,7 @@ function Sidebar({ color, image, routes }) {
     <div className="sidebar" data-image={image} data-color={color}>
       <div
         className="sidebar-background"
-        style={{
-          backgroundImage: "url(" + image + ")"
-        }}
+        style={{ backgroundImage: "url(" + image + ")" }}
       />
       <div className="sidebar-wrapper">
         <div className="logo d-flex align-items-center justify-content-start">
@@ -36,7 +42,6 @@ function Sidebar({ color, image, routes }) {
           {routes.map((prop, key) => {
             if (!prop.redirect) {
               if (prop.name === "Typography") {
-                // KETU bejme Dropdown special per Typography
                 return (
                   <li className="nav-item" key={key}>
                     <div
@@ -53,12 +58,20 @@ function Sidebar({ color, image, routes }) {
                     {openTypography && (
                       <ul className="nav flex-column ml-3">
                         <li className="nav-item">
-                          <NavLink to="/admin/terapisti" className="nav-link" activeClassName="active">
+                          <NavLink
+                            to="/admin/terapisti"
+                            className="nav-link"
+                            activeClassName="active"
+                          >
                             Shiko Terapistët
                           </NavLink>
                         </li>
                         <li className="nav-item">
-                          <NavLink to="/admin/nutricisti" className="nav-link" activeClassName="active">
+                          <NavLink
+                            to="/admin/nutricisti"
+                            className="nav-link"
+                            activeClassName="active"
+                          >
                             Shiko Nutricistët
                           </NavLink>
                         </li>
@@ -67,7 +80,6 @@ function Sidebar({ color, image, routes }) {
                   </li>
                 );
               } else {
-                // Normal rresht per rruget tjera
                 return (
                   <li
                     className={activeRoute(prop.layout + prop.path)}
@@ -87,6 +99,20 @@ function Sidebar({ color, image, routes }) {
             }
             return null;
           })}
+
+          {/* ✅ Shto Admin Dashboard vetëm nëse është ADMIN */}
+          {role === "ADMIN" && (
+            <li className={activeRoute("/admin/adminDashboard")}>
+              <NavLink
+                to="/admin/adminDashboard"
+                className="nav-link"
+                activeClassName="active"
+              >
+                <i className="nc-icon nc-settings-gear-65" />
+                <p>Admin Dashboard</p>
+              </NavLink>
+            </li>
+          )}
         </Nav>
       </div>
     </div>
