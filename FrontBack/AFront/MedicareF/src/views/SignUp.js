@@ -58,7 +58,7 @@ const SignUp = () => {
 
   return (
     <>
-      <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+      <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">6
         <div className="container">
           <a className="navbar-brand fw-bold text-primary" href="/">MediCare+</a>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
