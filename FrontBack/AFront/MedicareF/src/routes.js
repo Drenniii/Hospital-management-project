@@ -17,7 +17,7 @@ import Typography from "views/User/Typography.js";
 import Notifications from "views/Notifications.js";
 import AdminDashboard from "views/Admin/AdminDashboard.js"; // ✅ Importo komponentin e ri
 
-// Merr rolin nga localStorage
+//  Merr rolin nga localStorage
 const getUserRole = () => {
   return localStorage.getItem("userRole"); // Shembull: "admin", "terapist", "user"
 };

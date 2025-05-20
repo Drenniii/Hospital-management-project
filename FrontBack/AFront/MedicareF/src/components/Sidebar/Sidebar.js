@@ -100,7 +100,7 @@ function Sidebar({ color, image, routes }) {
             return null;
           })}
 
-          {/* ✅ Shto Admin Dashboard vetëm nëse është ADMIN */}
+          {/* ✅ Shto Admin Dashboard vetëm nëse është ADMIN*/}
           {role === "ADMIN" && (
             <li className={activeRoute("/admin/adminDashboard")}>
               <NavLink

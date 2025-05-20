@@ -41,7 +41,7 @@ root.render(
       <Route path="/signUp" component={SignUp} />
       <Route path="/login" component={Login} />
       <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/adminDashboard" component={AdminDashboard} /> {/* ✅ Rruga për AdminDashboard */}
+      <Route path="/adminDashboard" component={AdminDashboard} /> {/* ✅ Rruga Për AdminDashboard  */}
       <Redirect exact from="/" to="/home" />
     </Switch>
   </BrowserRouter>

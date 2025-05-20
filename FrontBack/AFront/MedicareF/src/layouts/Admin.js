@@ -14,7 +14,7 @@ import { useLocation, Route, Switch } from "react-router-dom";
 
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Footer from "components/Footer/Footer.js";
-import Sidebar from "components/Sidebar/Sidebar.js"; // ✅ Importi i saktë
+import Sidebar from "components/Sidebar/Sidebar.js"; //  Importi i saktë
 
 import routes from "routes.js";
 
