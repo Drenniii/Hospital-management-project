@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useHistory } from 'react-router-dom'; 
+import { useHistory } from 'react-router-dom'; // Import useHistory for navigation
 import Footer from './Footer';
 import ApiService from 'service/ApiService';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    firstname: '',
-    lastname: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: ''
   });
   const [errors, setErrors] = useState({});
-  const history = useHistory(); 
+  const history = useHistory(); // Hook to navigate
 
   const handleChange = (e) => {
     setFormData(prev => ({
@@ -23,34 +23,42 @@ const SignUp = () => {
 
   const validate = () => {
     let errs = {};
-    if (!formData.firstname) errs.firstname = 'First name is required';
-    if (!formData.lastname) errs.lastname = 'Last name is required';
+    if (!formData.firstName) errs.firstName = 'First name is required';
+    if (!formData.lastName) errs.lastName = 'Last name is required';
     if (!formData.email) errs.email = 'Email is required';
     if (!formData.password) errs.password = 'Password is required';
     return errs;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-    } else {
-      setErrors({});
-      try {
-        const response = await ApiService.registerUser(formData);
-        console.log('Sign up successful:', response);
-        history.push('/login');
-      } catch (error) {
-        console.error('Error signing up:', error);
-        setErrors({ general: 'Signup failed. Please try again.' });
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const validationErrors = validate();
+  if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+  } else {
+    setErrors({});
+    try {
+      const response = await ApiService.registerUser(formData);
+      console.log('Sign up successful:', response);
+      history.push('/login');
+    } catch (error) {
+      console.error('Error signing up:', error);
+
+      if (error.response && error.response.status === 400) {
+        // Show specific error returned by the backend (like email already registered)
+        setErrors({ general: error.response.data || 'Invalid input' });
+      } else {
+        setErrors({ general: 'Signup failed. Please try again later.' });
       }
     }
-  };
+  }
+};
+//signup
+
 
   return (
     <>
-      <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+      <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">6
         <div className="container">
           <a className="navbar-brand fw-bold text-primary" href="/">MediCare+</a>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -66,26 +74,26 @@ const SignUp = () => {
             <div className="mb-3">
               <input
                 type="text"
-                className={`form-control ${errors.firstname ? 'is-invalid' : ''}`}
-                id="firstname"
-                name="firstname"
-                value={formData.firstname}
+                className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
                 placeholder="First Name"
                 onChange={handleChange}
               />
-              {errors.firstname && <div className="invalid-feedback">{errors.firstname}</div>}
+              {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
             </div>
             <div className="mb-3">
               <input
                 type="text"
-                className={`form-control ${errors.lastname ? 'is-invalid' : ''}`}
-                id="lastname"
-                name="lastname"
-                value={formData.lastname}
+                className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
                 placeholder="Last Name"
                 onChange={handleChange}
               />
-              {errors.lastname && <div className="invalid-feedback">{errors.lastname}</div>}
+              {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
             </div>
             <div className="mb-3">
               <input
