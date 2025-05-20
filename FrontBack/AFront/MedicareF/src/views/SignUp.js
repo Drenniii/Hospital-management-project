@@ -31,22 +31,29 @@ const SignUp = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-    } else {
-      setErrors({});
-      try {
-        const response = await ApiService.registerUser(formData);
-        console.log('Sign up successful:', response);
-        history.push('/login');
-      } catch (error) {
-        console.error('Error signing up:', error);
-        setErrors({ general: 'Signup failed. Please try again.' });
+  e.preventDefault();
+  const validationErrors = validate();
+  if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+  } else {
+    setErrors({});
+    try {
+      const response = await ApiService.registerUser(formData);
+      console.log('Sign up successful:', response);
+      history.push('/login');
+    } catch (error) {
+      console.error('Error signing up:', error);
+
+      if (error.response && error.response.status === 400) {
+        // Show specific error returned by the backend (like email already registered)
+        setErrors({ general: error.response.data || 'Invalid input' });
+      } else {
+        setErrors({ general: 'Signup failed. Please try again later.' });
       }
     }
-  };
+  }
+};
+
 
   return (
     <>
