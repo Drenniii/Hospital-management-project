@@ -41,6 +41,28 @@ export default class ApiService {
     });
     return response.data;
   }
+
+
+  static async deleteUser(userId) {
+  const response = await axios.delete(`${this.BASE_URL}/api/v1/users/${userId}`, {
+    headers: this.getHeader()
+  });
+  return response.data;
+}
+
+
+static async updateUser(id, updatedUserData) {
+  const response = await axios.put(`${this.BASE_URL}/api/v1/users/${id}`, updatedUserData, {headers: this.getHeader()
+  });
+  return response.data; }
+  
+  static async logoutUser() {
+  const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, {
+    headers: this.getHeader()
+  });
+  return response.data;
+}
+
 }
 
 

@@ -13,6 +13,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 
+
+
+
 // Importo Bootstrap CSS dhe JS
 import "bootstrap/dist/css/bootstrap.min.css";  // CSS
 import "bootstrap/dist/js/bootstrap.bundle.min.js";  // JavaScript (opsional, për dropdowns, modals etj.)
