@@ -6,8 +6,8 @@ import ApiService from 'service/ApiService';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    firstname: '',   // Fixed: use 'firstname'
+    lastname: '',    // Fixed: use 'lastname'
     email: '',
     password: ''
   });
@@ -23,42 +23,40 @@ const SignUp = () => {
 
   const validate = () => {
     let errs = {};
-    if (!formData.firstName) errs.firstName = 'First name is required';
-    if (!formData.lastName) errs.lastName = 'Last name is required';
+    if (!formData.firstname) errs.firstname = 'First name is required';
+    if (!formData.lastname) errs.lastname = 'Last name is required';
     if (!formData.email) errs.email = 'Email is required';
     if (!formData.password) errs.password = 'Password is required';
     return errs;
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  const validationErrors = validate();
-  if (Object.keys(validationErrors).length > 0) {
-    setErrors(validationErrors);
-  } else {
-    setErrors({});
-    try {
-      const response = await ApiService.registerUser(formData);
-      console.log('Sign up successful:', response);
-      history.push('/login');
-    } catch (error) {
-      console.error('Error signing up:', error);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      setErrors({});
+      try {
+        const response = await ApiService.registerUser(formData);
+        console.log('Sign up successful:', response);
+        history.push('/login');
+      } catch (error) {
+        console.error('Error signing up:', error);
 
-      if (error.response && error.response.status === 400) {
-        // Show specific error returned by the backend (like email already registered)
-        setErrors({ general: error.response.data || 'Invalid input' });
-      } else {
-        setErrors({ general: 'Signup failed. Please try again later.' });
+        if (error.response && error.response.status === 400) {
+          // Show specific error returned by the backend (like email already registered)
+          setErrors({ general: error.response.data || 'Invalid input' });
+        } else {
+          setErrors({ general: 'Signup failed. Please try again later.' });
+        }
       }
     }
-  }
-};
-//signup
-
+  };
 
   return (
     <>
-      <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">6
+      <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div className="container">
           <a className="navbar-brand fw-bold text-primary" href="/">MediCare+</a>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -74,26 +72,26 @@ const SignUp = () => {
             <div className="mb-3">
               <input
                 type="text"
-                className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
+                className={`form-control ${errors.firstname ? 'is-invalid' : ''}`}
+                id="firstname"
+                name="firstname"
+                value={formData.firstname}
                 placeholder="First Name"
                 onChange={handleChange}
               />
-              {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
+              {errors.firstname && <div className="invalid-feedback">{errors.firstname}</div>}
             </div>
             <div className="mb-3">
               <input
                 type="text"
-                className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
+                className={`form-control ${errors.lastname ? 'is-invalid' : ''}`}
+                id="lastname"
+                name="lastname"
+                value={formData.lastname}
                 placeholder="Last Name"
                 onChange={handleChange}
               />
-              {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+              {errors.lastname && <div className="invalid-feedback">{errors.lastname}</div>}
             </div>
             <div className="mb-3">
               <input
