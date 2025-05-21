@@ -124,7 +124,7 @@ function UserTable({ title, users, onEdit, onDelete }) {
                 <td>{user.email}</td>
                 <td>{user.role}</td>
                 <td>
-                  <Button variant="warning" size="sm" onClick={() => onEdit(user)} className="me-2">
+                  <Button variant="warning" size="sm" onClick={() => onEdit(user)} className="me-2" style={{ marginRight: '14px' }}>
                     Ndrysho
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => onDelete(user.id)}>

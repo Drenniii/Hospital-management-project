@@ -238,14 +238,14 @@ function TableList() {
               ) : users.length === 0 ? (
                 <Alert variant="info">Nuk ka përdorues për t'u shfaqur.</Alert>
               ) : (
-                <Table striped bordered hover responsive>
+                <Table striped bordered responsive>
                   <thead className="table-dark">
                     <tr>
-                      <th>#</th>
-                      <th>Emri</th>
-                      <th>Mbiemri</th>
-                      <th>Email</th>
-                      <th>Veprime</th>
+                      <th className="text-white">#</th>
+                      <th className="text-white">Emri</th>
+                      <th className="text-white">Mbiemri</th>
+                      <th className="text-white">Email</th>
+                      <th className="text-white">Veprime</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -259,7 +259,8 @@ function TableList() {
                           <Button
                             variant="info"
                             size="sm"
-                            className="me-2"
+                            // className="me-2"
+                            style={{ marginRight: '14px' }}
                             onClick={() => openViewPanel(user)}
                           >
                             Shiko
@@ -267,7 +268,8 @@ function TableList() {
                           <Button
                             variant="warning"
                             size="sm"
-                            className="me-2"
+                            // className="me-2"
+                            style={{ marginRight: '14px' }}
                             onClick={() => openEditPanel(user)}
                           >
                             Ndrysho
