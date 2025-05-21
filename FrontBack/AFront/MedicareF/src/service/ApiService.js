@@ -63,6 +63,14 @@ static async updateUser(id, updatedUserData) {
   return response.data;
 }
 
+static async getCurrentUser() {
+  const response = await axios.get(`${this.BASE_URL}/api/v1/users/me`, {
+    headers: this.getHeader()
+  });
+  return response.data;
+}
+
+
 }
 
 
