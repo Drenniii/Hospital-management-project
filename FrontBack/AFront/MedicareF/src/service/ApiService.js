@@ -71,6 +71,12 @@ static async getCurrentUser() {
 }
 
 
+static async updateUserProfile(id, updatedUserDataProfile) {
+  const response = await axios.put(`${this.BASE_URL}/api/v1/users/profile/${id}`, updatedUserDataProfile, {headers: this.getHeader()
+  });
+  return response.data; }
+
+
 }
 
 

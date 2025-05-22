@@ -57,7 +57,7 @@ function User() {
     setMessage("");
     setError("");
 
-    ApiService.updateUser(formData.id, formData)
+    ApiService.updateUserProfile(formData.id, formData)
       .then(() => {
         setMessage("Profili u përditësua me sukses.");
       })
