@@ -36,14 +36,18 @@ const Login = () => {
     setServerError('');
 
     try {
+      ApiService.clearStorage(); // Clear any existing data
+     
       const response = await ApiService.loginUser(formData);
       console.log('Login successful:', response);
 
-      // Store tokens securely
-      localStorage.setItem('accessToken', response.access_token); // or use memory/React context
-      // Refresh token is handled via HttpOnly cookie (set via backend withCredentials)
+      // Store token and role in localStorage
+      localStorage.setItem('accessToken', response.access_token);
+      localStorage.setItem('userRole', response.role);
+      console.log('Role received:', response.role);
 
-      history.push('/admin');
+      // Force a complete reload to ensure proper route initialization
+      window.location.href = '/admin/dashboard';
     } catch (err) {
       console.error('Login error:', err);
       setServerError('Invalid email or password');

@@ -8,18 +8,18 @@ function Header() {
   const location = useLocation();
   const history = useHistory(); // ✅ useHistory instead of useNavigate
 
-  // ✅ Logout handler
-  const handleLogout = async () => {
-    console.log("Logout clicked");
-    try {
-      await ApiService.logoutUser();
-      localStorage.removeItem("accessToken");
-      history.push("/login"); // ✅ redirect using history for v5
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
+ const handleLogout = async () => {
+  console.log("Logout clicked");
+  try {
+    await ApiService.logoutUser();
+    // Clear ALL localStorage data
+    localStorage.clear();
+    // Force reload the application to reset all states
+    window.location.href = '/login';
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
   const mobileSidebarToggle = (e) => {
     e.preventDefault();
     document.documentElement.classList.toggle("nav-open");
@@ -109,7 +109,7 @@ function Header() {
             <Nav.Item>
               <Nav.Link className="m-0" href="#pablo" onClick={(e) => e.preventDefault()}>
                 <i className="nc-icon nc-zoom-split"></i>
-                <span className="d-lg-block"> Search</span>
+                <span className="d-lg-block"> Search</span>
               </Nav.Link>
             </Nav.Item>
           </Nav>
