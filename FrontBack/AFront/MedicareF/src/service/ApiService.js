@@ -35,6 +35,45 @@ export default class ApiService {
 
     return response.data;
   }
+   /** TASK CRUD **/
+
+static async getAllTasks() {
+  const response = await axios.get(`${this.BASE_URL}/api/v1/tasks`, {
+    headers: this.getHeaders()
+  });
+  return response.data;
+}
+
+static async getTaskById(taskId) {
+  const response = await axios.get(`${this.BASE_URL}/api/v1/tasks/${taskId}`, {
+    headers: this.getHeaders()
+  });
+  return response.data;
+}
+
+static async createTask(taskData) {
+  const response = await axios.post(`${this.BASE_URL}/api/v1/tasks`, taskData, {
+    headers: this.getHeaders()
+  });
+  return response.data;
+}
+
+static async updateTask(taskId, updatedTaskData) {
+  const response = await axios.put(`${this.BASE_URL}/api/v1/tasks/${taskId}`, updatedTaskData, {
+    headers: this.getHeaders()
+  });
+  return response.data;
+}
+
+static async deleteTask(taskId) {
+  const response = await axios.delete(`${this.BASE_URL}/api/v1/tasks/${taskId}`, {
+    headers: this.getHeaders()
+  });
+  return response.data;
+}
+
+
+
 
   static async logoutUser() {
     const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, { headers: this.getHeaders() });
@@ -111,17 +150,7 @@ export default class ApiService {
   }
 
 
-static async updateUserProfile(id, updatedUserDataProfile) {
-  const response = await axios.put(`${this.BASE_URL}/api/v1/users/profile/${id}`, updatedUserDataProfile, {headers: this.getHeader()
-  });
-  return response.data; }
 
-
-static logout() {
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
-    }
-    
 
    
 

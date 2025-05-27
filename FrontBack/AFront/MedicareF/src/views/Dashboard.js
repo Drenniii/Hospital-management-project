@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ChartistGraph from "react-chartist";
+import ApiService from "../service/ApiService";
+
 // react-bootstrap components
 import {
   Badge,
@@ -17,6 +19,82 @@ import {
 } from "react-bootstrap";
 
 function Dashboard() {
+  const [tasks, setTasks] = React.useState([]);
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editedDescription, setEditedDescription] = useState("");
+
+
+
+React.useEffect(() => {
+  fetchTasks();
+}, []);
+
+const fetchTasks = () => {
+  ApiService.getAllTasks()
+    .then((res) => {
+      console.log("Fetched tasks:", res.data);
+      setTasks(res);
+    })
+    .catch((err) => {
+      console.error("Error fetching tasks:", err);
+    });
+};
+const handleEdit = (task) => {
+  setEditingTaskId(task.id);
+  setEditedDescription(task.description);
+};
+const handleSaveEdit = (taskId) => {
+  ApiService.updateTask(taskId, {
+    description: editedDescription,
+    completed: tasks.find(t => t.id === taskId).completed,
+  })
+    .then(() => {
+      setEditingTaskId(null);
+      setEditedDescription("");
+      fetchTasks();
+    })
+    .catch(err => console.error("Edit failed:", err));
+};
+
+
+const handleDelete = (id) => {
+  ApiService.deleteTask(id)
+    .then(() => fetchTasks())
+    .catch((err) => console.error("Error deleting task:", err));
+};
+
+const toggleTaskCompleted = (task) => {
+  const updatedTask = { ...task, completed: !task.completed };
+  ApiService.updateTask(task.id, updatedTask)
+    .then(() => fetchTasks())
+    .catch((err) => console.error("Error updating task status:", err));
+};
+
+const handleCreateTask = () => {
+  if (!newTaskDescription.trim()) {
+    console.log("Task description is empty");
+    return;
+  }
+
+ 
+  const newTask = {
+    description: newTaskDescription,
+    completed: false,
+  };
+
+  console.log("Sending task:", newTask);
+
+  ApiService.createTask(newTask)
+    .then(() => {
+      console.log("Task created!");
+      setNewTaskDescription("");
+      fetchTasks(); // refresh
+    })
+    .catch((err) => console.error("Create task error:", err));
+};
+
+
   return (
     <>
       <Container fluid>
@@ -335,290 +413,104 @@ function Dashboard() {
                 <p className="card-category">Backend development</p>
               </Card.Header>
               <Card.Body>
+                <div className="d-flex mb-3">
+  <Form.Control
+    type="text"
+    placeholder="Enter new task"
+    value={newTaskDescription}
+    onChange={(e) => setNewTaskDescription(e.target.value)}
+  />
+  <Button
+    variant="success"
+    className="ml-2"
+    onClick={handleCreateTask}
+  >
+    Add
+  </Button>
+</div>
                 <div className="table-full-width">
                   <Table>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <Form.Check className="mb-1 pl-0">
-                            <Form.Check.Label>
-                              <Form.Check.Input
-                                defaultValue=""
-                                type="checkbox"
-                              ></Form.Check.Input>
-                              <span className="form-check-sign"></span>
-                            </Form.Check.Label>
-                          </Form.Check>
-                        </td>
-                        <td>
-                          Sign contract for "What are conference organizers
-                          afraid of?"
-                        </td>
-                        <td className="td-actions text-right">
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-488980961">
-                                Edit Task..
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="info"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-506045838">Remove..</Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="danger"
-                            >
-                              <i className="fas fa-times"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Check className="mb-1 pl-0">
-                            <Form.Check.Label>
-                              <Form.Check.Input
-                                defaultChecked
-                                defaultValue=""
-                                type="checkbox"
-                              ></Form.Check.Input>
-                              <span className="form-check-sign"></span>
-                            </Form.Check.Label>
-                          </Form.Check>
-                        </td>
-                        <td>
-                          Lines From Great Russian Literature? Or E-mails From
-                          My Boss?
-                        </td>
-                        <td className="td-actions text-right">
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-537440761">
-                                Edit Task..
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="info"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-21130535">Remove..</Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="danger"
-                            >
-                              <i className="fas fa-times"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Check className="mb-1 pl-0">
-                            <Form.Check.Label>
-                              <Form.Check.Input
-                                defaultChecked
-                                defaultValue=""
-                                type="checkbox"
-                              ></Form.Check.Input>
-                              <span className="form-check-sign"></span>
-                            </Form.Check.Label>
-                          </Form.Check>
-                        </td>
-                        <td>
-                          Flooded: One year later, assessing what was lost and
-                          what was found when a ravaging rain swept through
-                          metro Detroit
-                        </td>
-                        <td className="td-actions text-right">
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-577232198">
-                                Edit Task..
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="info"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-773861645">Remove..</Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="danger"
-                            >
-                              <i className="fas fa-times"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Check className="mb-1 pl-0">
-                            <Form.Check.Label>
-                              <Form.Check.Input
-                                defaultChecked
-                                type="checkbox"
-                              ></Form.Check.Input>
-                              <span className="form-check-sign"></span>
-                            </Form.Check.Label>
-                          </Form.Check>
-                        </td>
-                        <td>
-                          Create 4 Invisible User Experiences you Never Knew
-                          About
-                        </td>
-                        <td className="td-actions text-right">
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-422471719">
-                                Edit Task..
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="info"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-829164576">Remove..</Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="danger"
-                            >
-                              <i className="fas fa-times"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Check className="mb-1 pl-0">
-                            <Form.Check.Label>
-                              <Form.Check.Input
-                                defaultValue=""
-                                type="checkbox"
-                              ></Form.Check.Input>
-                              <span className="form-check-sign"></span>
-                            </Form.Check.Label>
-                          </Form.Check>
-                        </td>
-                        <td>Read "Following makes Medium better"</td>
-                        <td className="td-actions text-right">
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-160575228">
-                                Edit Task..
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="info"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-922981635">Remove..</Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="danger"
-                            >
-                              <i className="fas fa-times"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Check className="mb-1 pl-0">
-                            <Form.Check.Label>
-                              <Form.Check.Input
-                                defaultValue=""
-                                disabled
-                                type="checkbox"
-                              ></Form.Check.Input>
-                              <span className="form-check-sign"></span>
-                            </Form.Check.Label>
-                          </Form.Check>
-                        </td>
-                        <td>Unfollow 5 enemies from twitter</td>
-                        <td className="td-actions text-right">
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-938342127">
-                                Edit Task..
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="info"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger
-                            overlay={
-                              <Tooltip id="tooltip-119603706">Remove..</Tooltip>
-                            }
-                          >
-                            <Button
-                              className="btn-simple btn-link p-1"
-                              type="button"
-                              variant="danger"
-                            >
-                              <i className="fas fa-times"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </td>
-                      </tr>
-                    </tbody>
+                  <tbody>
+  {tasks.map((task) => (
+    <tr key={task.id}>
+      <td>
+        <Form.Check className="mb-1 pl-0">
+          <Form.Check.Label>
+            <Form.Check.Input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => toggleTaskCompleted(task)}
+            />
+            <span className="form-check-sign"></span>
+          </Form.Check.Label>
+        </Form.Check>
+      </td>
+
+      <td>
+        {editingTaskId === task.id ? (
+          <Form.Control
+            type="text"
+            value={editedDescription}
+            onChange={(e) => setEditedDescription(e.target.value)}
+          />
+        ) : (
+          task.description
+        )}
+      </td>
+
+      <td className="td-actions text-right">
+        <OverlayTrigger
+          overlay={
+            <Tooltip id={`edit-${task.id}`}>
+              {editingTaskId === task.id ? "Save" : "Edit Task"}
+            </Tooltip>
+          }
+        >
+          <Button
+            className="btn-simple btn-link p-1"
+            type="button"
+            variant="info"
+            onClick={() => {
+              if (editingTaskId === task.id) {
+                ApiService.updateTask(task.id, {
+                  ...task,
+                  description: editedDescription,
+                })
+                  .then(() => {
+                    setEditingTaskId(null);
+                    setEditedDescription("");
+                    fetchTasks();
+                  })
+                  .catch((err) =>
+                    console.error("Error updating task description:", err)
+                  );
+              } else {
+                setEditingTaskId(task.id);
+                setEditedDescription(task.description);
+              }
+            }}
+          >
+            <i className={`fas ${editingTaskId === task.id ? "fa-check" : "fa-edit"}`}></i>
+          </Button>
+        </OverlayTrigger>
+
+        <OverlayTrigger
+          overlay={<Tooltip id={`delete-${task.id}`}>Remove</Tooltip>}
+        >
+          <Button
+            className="btn-simple btn-link p-1"
+            type="button"
+            variant="danger"
+            onClick={() => handleDelete(task.id)}
+          >
+            <i className="fas fa-times"></i>
+          </Button>
+        </OverlayTrigger>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
                   </Table>
                 </div>
               </Card.Body>
