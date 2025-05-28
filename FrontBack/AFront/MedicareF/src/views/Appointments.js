@@ -14,9 +14,8 @@ import {
   Tab
 } from "react-bootstrap";
 import ApiService from "service/ApiService";
-import CreateAppointment from "./CreateAppointment";
 
-// Modal styles
+// Custom Modal Styles
 const modalOverlayStyle = {
   position: "fixed",
   top: 0,
@@ -34,46 +33,64 @@ const modalContentStyle = {
   backgroundColor: "white",
   padding: "20px",
   borderRadius: "8px",
-  width: "90%",
-  maxWidth: "800px",
-  maxHeight: "90vh",
+  width: "400px",
+  maxHeight: "80vh",
   overflowY: "auto",
   boxShadow: "0 5px 15px rgba(0,0,0,.5)",
 };
 
-function AppointmentModal({ show, onClose, children }) {
+// Helper function for status badge variants
+const getStatusBadgeVariant = (status) => {
+  switch (status) {
+    case "SCHEDULED":
+      return "primary";
+    case "COMPLETED":
+      return "success";
+    case "CANCELLED":
+      return "danger";
+    case "NO_SHOW":
+      return "warning";
+    default:
+      return "secondary";
+  }
+};
+
+function ViewDetailsPanel({ appointment, show, onClose }) {
   if (!show) return null;
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h4 className="mb-0">Schedule New Appointment</h4>
-          <Button variant="link" onClick={onClose} className="p-0 text-dark">
-            <i className="fas fa-times"></i>
-          </Button>
-        </div>
-        {children}
+        <h4>Appointment Details</h4>
+        {appointment ? (
+          <>
+            <p><strong>Client:</strong> {appointment.client.firstname} {appointment.client.lastname}</p>
+            <p><strong>Date & Time:</strong> {new Date(appointment.appointmentDateTime).toLocaleString()}</p>
+            <p><strong>Type:</strong> {appointment.type}</p>
+            <p>
+              <strong>Status:</strong>{" "}
+              <Badge 
+                bg={getStatusBadgeVariant(appointment.status)}
+                text={appointment.status === "WARNING" ? "dark" : "white"}
+              >
+                {appointment.status}
+              </Badge>
+            </p>
+            <p><strong>Notes:</strong> {appointment.notes || "No notes provided"}</p>
+            <p><strong>Created At:</strong> {new Date(appointment.createdAt).toLocaleString()}</p>
+          </>
+        ) : (
+          <p>No appointment data to display.</p>
+        )}
+        <Button variant="secondary" onClick={onClose}>Close</Button>
       </div>
     </div>
   );
 }
 
 function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) {
-  const getStatusBadgeVariant = (status) => {
-    switch (status) {
-      case "SCHEDULED":
-        return "primary";
-      case "COMPLETED":
-        return "success";
-      case "CANCELLED":
-        return "danger";
-      case "NO_SHOW":
-        return "warning";
-      default:
-        return "secondary";
-    }
-  };
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [viewPanelVisible, setViewPanelVisible] = useState(false);
 
   const handleDelete = (appointmentId, status) => {
     const message = status === "COMPLETED" 
@@ -85,72 +102,110 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
     }
   };
 
+  const openViewPanel = (appointment) => {
+    setSelectedAppointment(appointment);
+    setViewPanelVisible(true);
+  };
+
+  const closeViewPanel = () => {
+    setSelectedAppointment(null);
+    setViewPanelVisible(false);
+  };
+
   return (
-    <Table responsive>
-      <thead>
-        <tr>
-          <th>Date & Time</th>
-          <th>{userRole === "USER" ? "Professional" : "Client"}</th>
-          <th>Type</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {appointments.map((appointment) => (
-          <tr key={appointment.id}>
-            <td>
-              {new Date(appointment.appointmentDateTime).toLocaleString()}
-            </td>
-            <td>
-              {userRole === "USER"
-                ? `${appointment.professional.firstname} ${appointment.professional.lastname}`
-                : `${appointment.client.firstname} ${appointment.client.lastname}`}
-            </td>
-            <td>{appointment.type}</td>
-            <td>
-              <Badge 
-                bg={getStatusBadgeVariant(appointment.status)}
-                text={appointment.status === "WARNING" ? "dark" : "white"}
-              >
-                {appointment.status}
-              </Badge>
-            </td>
-            <td>
-              {appointment.status === "SCHEDULED" ? (
-                <>
-                  {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+    <>
+      <Table responsive>
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>{userRole === "USER" ? "Professional" : "Client"}</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {appointments.map((appointment) => (
+            <tr key={appointment.id}>
+              <td>
+                {new Date(appointment.appointmentDateTime).toLocaleString()}
+              </td>
+              <td>
+                {userRole === "USER"
+                  ? `${appointment.professional.firstname} ${appointment.professional.lastname}`
+                  : `${appointment.client.firstname} ${appointment.client.lastname}`}
+              </td>
+              <td>{appointment.type}</td>
+              <td>
+                <Badge 
+                  bg={getStatusBadgeVariant(appointment.status)}
+                  text={appointment.status === "WARNING" ? "dark" : "white"}
+                >
+                  {appointment.status}
+                </Badge>
+              </td>
+              <td>
+                {appointment.status === "SCHEDULED" ? (
+                  <>
+                    {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+                      <>
+                        <Button
+                          variant="info"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => openViewPanel(appointment)}
+                        >
+                          View Details
+                        </Button>
+                        <Button
+                          variant="success"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => onStatusUpdate(appointment.id, "COMPLETED")}
+                        >
+                          Mark Complete
+                        </Button>
+                      </>
+                    )}
                     <Button
-                      variant="success"
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(appointment.id, appointment.status)}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : appointment.status === "COMPLETED" && (userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+                  <>
+                    <Button
+                      variant="info"
                       size="sm"
                       className="me-2"
-                      onClick={() => onStatusUpdate(appointment.id, "COMPLETED")}
+                      onClick={() => openViewPanel(appointment)}
                     >
-                      Mark Complete
+                      View Details
                     </Button>
-                  )}
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(appointment.id, appointment.status)}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              ) : appointment.status === "COMPLETED" && (userRole === "THERAPIST" || userRole === "NUTRICIST") && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDelete(appointment.id, appointment.status)}
-                >
-                  Delete Record
-                </Button>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(appointment.id, appointment.status)}
+                    >
+                      Delete Record
+                    </Button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <ViewDetailsPanel
+        appointment={selectedAppointment}
+        show={viewPanelVisible}
+        onClose={closeViewPanel}
+      />
+    </>
   );
 }
 
@@ -158,7 +213,6 @@ function Appointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState("active");
   const userRole = localStorage.getItem("userRole");
   const history = useHistory();
@@ -300,15 +354,6 @@ function Appointments() {
                     : "Your scheduled appointments with clients"}
                 </p>
               </div>
-              {userRole === "USER" && (
-                <Button 
-                  variant="primary"
-                  onClick={() => setShowCreateModal(true)}
-                  className="btn-fill"
-                >
-                  Schedule New Appointment
-                </Button>
-              )}
             </Card.Header>
             <Card.Body>
               {userRole === "USER" ? (
@@ -378,19 +423,6 @@ function Appointments() {
           </Card>
         </Col>
       </Row>
-
-      <AppointmentModal 
-        show={showCreateModal} 
-        onClose={() => setShowCreateModal(false)}
-      >
-        <CreateAppointment
-          onHide={() => setShowCreateModal(false)}
-          onAppointmentCreated={() => {
-            loadAppointments();
-            setShowCreateModal(false);
-          }}
-        />
-      </AppointmentModal>
     </Container>
   );
 }
