@@ -27,65 +27,65 @@ export default class ApiService {
       { withCredentials: true }
     );
 
-    // After successful login, save tokens and role to localStorage
     if (response.data) {
       localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("userRole", response.data.role); // assuming backend sends role here
+      localStorage.setItem("userRole", response.data.role);
     }
 
     return response.data;
   }
-   /** TASK CRUD **/
 
-static async getAllTasks() {
-  const response = await axios.get(`${this.BASE_URL}/api/v1/tasks`, {
-    headers: this.getHeaders()
-  });
-  return response.data;
-}
+  /** TASK CRUD **/
 
-static async getTaskById(taskId) {
-  const response = await axios.get(`${this.BASE_URL}/api/v1/tasks/${taskId}`, {
-    headers: this.getHeaders()
-  });
-  return response.data;
-}
+  static async getAllTasks() {
+    const response = await axios.get(`${this.BASE_URL}/api/v1/tasks`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
 
-static async createTask(taskData) {
-  const response = await axios.post(`${this.BASE_URL}/api/v1/tasks`, taskData, {
-    headers: this.getHeaders()
-  });
-  return response.data;
-}
+  static async getTaskById(taskId) {
+    const response = await axios.get(`${this.BASE_URL}/api/v1/tasks/${taskId}`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
 
-static async updateTask(taskId, updatedTaskData) {
-  const response = await axios.put(`${this.BASE_URL}/api/v1/tasks/${taskId}`, updatedTaskData, {
-    headers: this.getHeaders()
-  });
-  return response.data;
-}
+  static async createTask(taskData) {
+    const response = await axios.post(`${this.BASE_URL}/api/v1/tasks`, taskData, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
 
-static async deleteTask(taskId) {
-  const response = await axios.delete(`${this.BASE_URL}/api/v1/tasks/${taskId}`, {
-    headers: this.getHeaders()
-  });
-  return response.data;
-}
+  static async updateTask(taskId, updatedTaskData) {
+    const response = await axios.put(`${this.BASE_URL}/api/v1/tasks/${taskId}`, updatedTaskData, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
 
-
-
+  static async deleteTask(taskId) {
+    const response = await axios.delete(`${this.BASE_URL}/api/v1/tasks/${taskId}`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
 
   static async logoutUser() {
-    const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, { headers: this.getHeaders() });
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("userRole");
+    const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, {
+      headers: this.getHeaders()
+    });
+    this.clearStorage();
     return response.data;
   }
 
   // === USER API ===
 
   static async getAllUsers() {
-    const response = await axios.get(`${this.BASE_URL}/api/v1/users/get`, { headers: this.getHeaders() });
+    const response = await axios.get(`${this.BASE_URL}/api/v1/users/get`, {
+      headers: this.getHeaders()
+    });
     return response.data;
   }
 
@@ -148,6 +148,7 @@ static async deleteTask(taskId) {
     localStorage.removeItem("userRole");
     localStorage.clear();
   }
+
   static async changePassword(passwordData) {
     const response = await axios.patch(
       `${this.BASE_URL}/api/v1/users/change-password`,
@@ -156,10 +157,136 @@ static async deleteTask(taskId) {
         newPassword: passwordData.newPassword,
         confirmationPassword: passwordData.confirmationPassword
       },
-      { 
+      {
         headers: this.getHeaders()
       }
     );
     return response.data;
+  }
+
+  /** Get Users by Role **/
+  static async getUsersByRole(role) {
+    const response = await axios.get(`${this.BASE_URL}/api/v1/users/role/${role}`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
+
+  /** Therapist API **/
+  static async getAllTherapists() {
+    return this.getUsersByRole("THERAPIST");
+  }
+
+  /** Nutritionist API **/
+  static async getAllNutritionists() {
+    return this.getUsersByRole("NUTRICIST");
+  }
+
+  /** Appointment API **/
+  static async createAppointment(clientId, professionalId, appointmentDateTime, type, notes = "") {
+    try {
+      const formData = new FormData();
+      formData.append('clientId', clientId.toString());
+      formData.append('professionalId', professionalId.toString());
+      formData.append('appointmentDateTime', appointmentDateTime);
+      formData.append('type', type);
+      formData.append('notes', notes || "");
+
+      const response = await axios.post(
+        `${this.BASE_URL}/api/v1/appointments/create`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('CreateAppointment error:', error.response || error);
+      throw error;
+    }
+  }
+
+  static async getClientAppointments() {
+    try {
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
+
+      const user = await this.getCurrentUser();
+      const response = await axios.get(`${this.BASE_URL}/api/v1/appointments/client`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('GetClientAppointments error:', error.response || error);
+      throw error;
+    }
+  }
+
+  static async getProfessionalAppointments() {
+    try {
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await axios.get(`${this.BASE_URL}/api/v1/appointments/professional`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('GetProfessionalAppointments error:', error.response || error);
+      throw error;
+    }
+  }
+
+  static async updateAppointmentStatus(appointmentId, status) {
+    try {
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await axios.patch(
+        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/status`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('UpdateAppointmentStatus error:', error.response || error);
+      throw error;
+    }
+  }
+
+  static async deleteAppointment(appointmentId) {
+    try {
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await axios.delete(
+        `${this.BASE_URL}/api/v1/appointments/${appointmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('DeleteAppointment error:', error.response || error);
+      throw error;
+    }
   }
 }

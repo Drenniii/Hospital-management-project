@@ -7,6 +7,10 @@ import TableList from "views/Terapisti/TableList.js";
 import Typography from "views/User/Typography.js";
 import Notifications from "views/Notifications.js";
 import AdminDashboard from "views/Admin/AdminDashboard.js";
+import UserDashboard from "views/User/UserDashboard.js";
+import TherapistSelection from "views/User/TherapistSelection.js";
+import NutritionistSelection from "views/User/NutritionistSelection.js";
+import Appointments from "views/Appointments.js";
 import Settings from "views/Settings.js";
 
 // ==========================================
@@ -14,7 +18,7 @@ import Settings from "views/Settings.js";
 // ==========================================
 const getUserRole = () => {
   const role = localStorage.getItem("userRole");
-  console.log("Current user role:", role); // Debug log
+  console.log("Current user role:", role);
   return role;
 };
 
@@ -23,17 +27,17 @@ const getUserRole = () => {
 // ======================================
 const commonRoutes = [
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    icon: "nc-icon nc-chart-pie-35",
-    component: Dashboard,
-    layout: "/admin",
-  },
-  {
     path: "/user",
     name: "User Profile",
     icon: "nc-icon nc-circle-09",
     component: UserProfile,
+    layout: "/admin",
+  },
+  {
+    path: "/appointments",
+    name: "Appointments",
+    icon: "nc-icon nc-watch-time",
+    component: Appointments,
     layout: "/admin",
   },
   {
@@ -45,7 +49,9 @@ const commonRoutes = [
   },
 ];
 
-// Hidden routes (accessible but not shown in sidebar)
+// ======================================
+// Rreshtat që janë të fshehur (hidden)
+// ======================================
 const hiddenRoutes = [
   {
     path: "/settings",
@@ -53,6 +59,19 @@ const hiddenRoutes = [
     icon: "nc-icon nc-settings-gear-65",
     component: Settings,
     layout: "/admin",
+    hidden: true,
+  },
+  {
+    path: "/therapist-selection",
+    component: TherapistSelection,
+    layout: "/admin",
+    hidden: true,
+  },
+  {
+    path: "/nutritionist-selection",
+    component: NutritionistSelection,
+    layout: "/admin",
+    hidden: true,
   },
 ];
 
@@ -60,6 +79,13 @@ const hiddenRoutes = [
 // Rreshtat për TERAPISTËT
 // ========================
 const therapistRoutes = [
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "nc-icon nc-chart-pie-35",
+    component: Dashboard,
+    layout: "/admin",
+  },
   {
     path: "/table",
     name: "Table List",
@@ -74,10 +100,10 @@ const therapistRoutes = [
 // ========================
 const userRoutes = [
   {
-    path: "/typography",
-    name: "Typography",
-    icon: "nc-icon nc-paper-2",
-    component: Typography,
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "nc-icon nc-chart-pie-35",
+    component: UserDashboard,
     layout: "/admin",
   },
 ];
@@ -87,10 +113,30 @@ const userRoutes = [
 // ====================
 const adminRoutes = [
   {
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "nc-icon nc-chart-pie-35",
+    component: Dashboard,
+    layout: "/admin",
+  },
+  {
     path: "/adminDashboard",
     name: "Admin Dashboard",
     icon: "nc-icon nc-settings-gear-65",
     component: AdminDashboard,
+    layout: "/admin",
+  },
+];
+
+// ====================
+// Rreshtat për NUTRICIONISTËT
+// ====================
+const nutritionistRoutes = [
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "nc-icon nc-chart-pie-35",
+    component: Dashboard,
     layout: "/admin",
   },
 ];
@@ -100,7 +146,7 @@ const adminRoutes = [
 // =====================================================
 const getRoutesByRole = () => {
   const role = getUserRole();
-  console.log("Getting routes for role:", role); // Debug log
+  console.log("Getting routes for role:", role);
 
   let routes;
   switch (role) {
@@ -113,27 +159,29 @@ const getRoutesByRole = () => {
     case "ADMIN":
       routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
+    case "NUTRITIONIST":
+      routes = [...commonRoutes, ...nutritionistRoutes, ...hiddenRoutes];
+      break;
     default:
       routes = [...commonRoutes, ...hiddenRoutes];
   }
-  
-  console.log("Returned routes:", routes); // Debug log
+
+  console.log("Returned routes:", routes);
   return routes;
 };
 
 // ======================
 // Eksportimi i rreshtave
 // ======================
-// Create a proxy object that returns fresh routes when accessed
+// Kthen rreshtat e freskët çdo herë që aksesohen
 const routesProxy = new Proxy([], {
-  get: function(target, prop) {
-    // When array methods are called, return them bound to the current routes
+  get: function (target, prop) {
     const currentRoutes = getRoutesByRole();
-    if (typeof currentRoutes[prop] === 'function') {
+    if (typeof currentRoutes[prop] === "function") {
       return currentRoutes[prop].bind(currentRoutes);
     }
     return currentRoutes[prop];
-  }
+  },
 });
 
 export default routesProxy;

@@ -18,9 +18,6 @@ function Sidebar({ color, image, routes }) {
     return location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
 
-  // Filter out routes that should be hidden from sidebar
-  const visibleRoutes = routes.filter(route => route.path !== "/settings");
-
   return (
     <div className="sidebar" data-image={image} data-color={color}>
       <div
@@ -42,8 +39,9 @@ function Sidebar({ color, image, routes }) {
           </a>
         </div>
         <Nav>
-          {visibleRoutes.map((prop, key) => {
-            if (!prop.redirect) {
+          {routes
+            .filter(route => !route.redirect && !route.hidden)
+            .map((prop, key) => {
               if (prop.name === "Typography") {
                 return (
                   <li className="nav-item" key={key}>
@@ -84,10 +82,7 @@ function Sidebar({ color, image, routes }) {
                 );
               } else {
                 return (
-                  <li
-                    className={activeRoute(prop.layout + prop.path)}
-                    key={key}
-                  >
+                  <li className={activeRoute(prop.layout + prop.path)} key={key}>
                     <NavLink
                       to={prop.layout + prop.path}
                       className="nav-link"
@@ -99,11 +94,8 @@ function Sidebar({ color, image, routes }) {
                   </li>
                 );
               }
-            }
-            return null;
-          })}
+            })}
 
-          {/* Admin Dashboard for ADMIN role */}
           {role === "ADMIN" && (
             <li className={activeRoute("/admin/adminDashboard")}>
               <NavLink
