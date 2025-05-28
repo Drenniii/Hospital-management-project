@@ -10,13 +10,16 @@ function Sidebar({ color, image, routes }) {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user?.role) {
-      setRole(user.role.toUpperCase()); // sigurohemi që roli të jetë uppercase
+      setRole(user.role.toUpperCase());
     }
   }, []);
 
   const activeRoute = (routeName) => {
     return location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
+
+  // Filter out routes that should be hidden from sidebar
+  const visibleRoutes = routes.filter(route => route.path !== "/settings");
 
   return (
     <div className="sidebar" data-image={image} data-color={color}>
@@ -39,7 +42,7 @@ function Sidebar({ color, image, routes }) {
           </a>
         </div>
         <Nav>
-          {routes.map((prop, key) => {
+          {visibleRoutes.map((prop, key) => {
             if (!prop.redirect) {
               if (prop.name === "Typography") {
                 return (
@@ -100,7 +103,7 @@ function Sidebar({ color, image, routes }) {
             return null;
           })}
 
-          {/* ✅ Shto Admin Dashboard vetëm nëse është ADMIN*/}
+          {/* Admin Dashboard for ADMIN role */}
           {role === "ADMIN" && (
             <li className={activeRoute("/admin/adminDashboard")}>
               <NavLink

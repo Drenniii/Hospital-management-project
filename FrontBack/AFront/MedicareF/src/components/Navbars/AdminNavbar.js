@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom"; // ✅ useHistory for v5
 import { Navbar, Container, Nav, Dropdown, Button } from "react-bootstrap";
 import routes from "routes.js";
@@ -7,19 +7,26 @@ import ApiService from "../../service/ApiService";  // ✅ Adjust path based on 
 function Header() {
   const location = useLocation();
   const history = useHistory(); // ✅ useHistory instead of useNavigate
+  const [userRole, setUserRole] = useState("");
 
- const handleLogout = async () => {
-  console.log("Logout clicked");
-  try {
-    await ApiService.logoutUser();
-    // Clear ALL localStorage data
-    localStorage.clear();
-    // Force reload the application to reset all states
-    window.location.href = '/login';
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
-};
+  useEffect(() => {
+    const role = localStorage.getItem("userRole");
+    setUserRole(role);
+  }, []);
+
+  const handleLogout = async () => {
+    console.log("Logout clicked");
+    try {
+      await ApiService.logoutUser();
+      // Clear ALL localStorage data
+      localStorage.clear();
+      // Force reload the application to reset all states
+      window.location.href = '/login';
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const mobileSidebarToggle = (e) => {
     e.preventDefault();
     document.documentElement.classList.toggle("nav-open");
@@ -39,6 +46,10 @@ function Header() {
       }
     }
     return "Brand";
+  };
+
+  const navigateTo = (path) => {
+    history.push(path);
   };
 
   return (
@@ -69,88 +80,16 @@ function Header() {
           <Nav className="nav mr-auto" navbar>
             <Nav.Item>
               <Nav.Link
-                href="#pablo"
+                className="m-0"
+                href="#"
                 onClick={(e) => e.preventDefault()}
-                className="m-0"
               >
-                <i className="nc-icon nc-palette"></i>
-                <span className="d-lg-none ml-1">Dashboard</span>
-              </Nav.Link>
-            </Nav.Item>
-            <Dropdown as={Nav.Item}>
-              <Dropdown.Toggle
-                as={Nav.Link}
-                id="dropdown-67443507"
-                variant="default"
-                className="m-0"
-              >
-                <i className="nc-icon nc-planet"></i>
-                <span className="notification">5</span>
-                <span className="d-lg-none ml-1">Notification</span>
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Notification 1
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Notification 2
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Notification 3
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Notification 4
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Another notification
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-            <Nav.Item>
-              <Nav.Link className="m-0" href="#pablo" onClick={(e) => e.preventDefault()}>
-                <i className="nc-icon nc-zoom-split"></i>
-                <span className="d-lg-block"> Search</span>
+                <i className="nc-icon nc-chart-pie-35"></i>
+                <span className="d-lg-none">Dashboard</span>
               </Nav.Link>
             </Nav.Item>
           </Nav>
           <Nav className="ml-auto" navbar>
-            <Nav.Item>
-              <Nav.Link className="m-0" href="#pablo" onClick={(e) => e.preventDefault()}>
-                <span className="no-icon">Account</span>
-              </Nav.Link>
-            </Nav.Item>
-            <Dropdown as={Nav.Item}>
-              <Dropdown.Toggle
-                aria-expanded={false}
-                aria-haspopup={true}
-                as={Nav.Link}
-                id="navbarDropdownMenuLink"
-                variant="default"
-                className="m-0"
-              >
-                <span className="no-icon">Dropdown</span>
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Action
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Another action
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Something
-                </Dropdown.Item>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Something else here
-                </Dropdown.Item>
-                <div className="divider"></div>
-                <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                  Separated link
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-
-            {/* ✅ LOGOUT BUTTON */}
             <Nav.Item>
               <Nav.Link
                 className="m-0"
@@ -163,6 +102,58 @@ function Header() {
                 <span className="no-icon">Log out</span>
               </Nav.Link>
             </Nav.Item>
+            <Dropdown as={Nav.Item}>
+              <Dropdown.Toggle
+                as={Nav.Link}
+                className="m-0"
+              >
+                <i className="nc-icon nc-circle-09 mr-1"></i>
+                <span>{userRole ? userRole.toLowerCase() : 'Profile'}</span>
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => navigateTo("/admin/user")}>
+                  <i className="nc-icon nc-single-02 mr-2"></i>My Profile
+                </Dropdown.Item>
+                
+                {userRole === "ADMIN" && (
+                  <>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/adminDashboard")}>
+                      <i className="nc-icon nc-chart-pie-35 mr-2"></i>Dashboard
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/users")}>
+                      <i className="nc-icon nc-badge mr-2"></i>Manage Users
+                    </Dropdown.Item>
+                  </>
+                )}
+
+                {userRole === "THERAPIST" && (
+                  <>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/appointments")}>
+                      <i className="nc-icon nc-calendar-60 mr-2"></i>Appointments
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/patients")}>
+                      <i className="nc-icon nc-single-02 mr-2"></i>Patients
+                    </Dropdown.Item>
+                  </>
+                )}
+
+                {userRole === "NUTRICIST" && (
+                  <>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/diet-plans")}>
+                      <i className="nc-icon nc-paper-2 mr-2"></i>Diet Plans
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/nutritionist-patients")}>
+                      <i className="nc-icon nc-single-02 mr-2"></i>Patients
+                    </Dropdown.Item>
+                  </>
+                )}
+
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={() => navigateTo("/admin/settings")}>
+                  <i className="nc-icon nc-settings-gear-65 mr-2"></i>Settings
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </Nav>
         </Navbar.Collapse>
       </Container>
