@@ -10,6 +10,8 @@ import {
   Badge,
   Spinner,
   Alert,
+  Nav,
+  Tab
 } from "react-bootstrap";
 import ApiService from "service/ApiService";
 import CreateAppointment from "./CreateAppointment";
@@ -57,11 +59,107 @@ function AppointmentModal({ show, onClose, children }) {
   );
 }
 
+function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) {
+  const getStatusBadgeVariant = (status) => {
+    switch (status) {
+      case "SCHEDULED":
+        return "primary";
+      case "COMPLETED":
+        return "success";
+      case "CANCELLED":
+        return "danger";
+      case "NO_SHOW":
+        return "warning";
+      default:
+        return "secondary";
+    }
+  };
+
+  const handleDelete = (appointmentId, status) => {
+    const message = status === "COMPLETED" 
+      ? "Are you sure you want to delete this completed appointment record?"
+      : "Are you sure you want to cancel this appointment?";
+    
+    if (window.confirm(message)) {
+      onDelete(appointmentId);
+    }
+  };
+
+  return (
+    <Table responsive>
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>{userRole === "USER" ? "Professional" : "Client"}</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {appointments.map((appointment) => (
+          <tr key={appointment.id}>
+            <td>
+              {new Date(appointment.appointmentDateTime).toLocaleString()}
+            </td>
+            <td>
+              {userRole === "USER"
+                ? `${appointment.professional.firstname} ${appointment.professional.lastname}`
+                : `${appointment.client.firstname} ${appointment.client.lastname}`}
+            </td>
+            <td>{appointment.type}</td>
+            <td>
+              <Badge 
+                bg={getStatusBadgeVariant(appointment.status)}
+                text={appointment.status === "WARNING" ? "dark" : "white"}
+              >
+                {appointment.status}
+              </Badge>
+            </td>
+            <td>
+              {appointment.status === "SCHEDULED" ? (
+                <>
+                  {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => onStatusUpdate(appointment.id, "COMPLETED")}
+                    >
+                      Mark Complete
+                    </Button>
+                  )}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(appointment.id, appointment.status)}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : appointment.status === "COMPLETED" && (userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDelete(appointment.id, appointment.status)}
+                >
+                  Delete Record
+                </Button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}
+
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("active");
   const userRole = localStorage.getItem("userRole");
   const history = useHistory();
 
@@ -124,10 +222,17 @@ function Appointments() {
 
   const handleStatusUpdate = async (appointmentId, newStatus) => {
     try {
+      console.log('Updating appointment status:', { appointmentId, newStatus });
       await ApiService.updateAppointmentStatus(appointmentId, newStatus);
-      loadAppointments();
+      console.log('Status update successful');
+      await loadAppointments();
     } catch (err) {
       console.error("Error updating appointment status:", err);
+      console.error("Error details:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       alert("Failed to update appointment status. Please try again.");
     }
   };
@@ -139,35 +244,20 @@ function Appointments() {
 
     try {
       await ApiService.deleteAppointment(appointmentId);
-      loadAppointments();
+      await loadAppointments();
     } catch (err) {
       console.error("Error deleting appointment:", err);
       alert("Failed to cancel appointment. Please try again.");
     }
   };
 
-  const getStatusBadgeVariant = (status) => {
-    switch (status) {
-      case "SCHEDULED":
-        return "primary";
-      case "COMPLETED":
-        return "success";
-      case "CANCELLED":
-        return "danger";
-      case "NO_SHOW":
-        return "warning";
-      default:
-        return "secondary";
-    }
-  };
+  const activeAppointments = appointments.filter(
+    app => app.status === "SCHEDULED"
+  );
 
-  console.log("Rendering Appointments component with state:", {
-    showCreateModal,
-    userRole,
-    appointmentsCount: appointments?.length,
-    loading,
-    error
-  });
+  const completedAppointments = appointments.filter(
+    app => app.status === "COMPLETED"
+  );
 
   if (loading) {
     return (
@@ -221,68 +311,68 @@ function Appointments() {
               )}
             </Card.Header>
             <Card.Body>
-              {appointments.length === 0 ? (
-                <div className="text-center p-3">
-                  <p className="mb-0">No appointments found.</p>
-                </div>
+              {userRole === "USER" ? (
+                // For regular users, only show active appointments
+                activeAppointments.length === 0 ? (
+                  <div className="text-center p-3">
+                    <p className="mb-0">No active appointments found.</p>
+                  </div>
+                ) : (
+                  <AppointmentTable
+                    appointments={activeAppointments}
+                    userRole={userRole}
+                    onStatusUpdate={handleStatusUpdate}
+                    onDelete={handleDelete}
+                  />
+                )
               ) : (
-                <Table responsive>
-                  <thead>
-                    <tr>
-                      <th>Date & Time</th>
-                      <th>{userRole === "USER" ? "Professional" : "Client"}</th>
-                      <th>Type</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.map((appointment) => (
-                      <tr key={appointment.id}>
-                        <td>
-                          {new Date(appointment.appointmentDateTime).toLocaleString()}
-                        </td>
-                        <td>
-                          {userRole === "USER"
-                            ? `${appointment.professional.firstname} ${appointment.professional.lastname}`
-                            : `${appointment.client.firstname} ${appointment.client.lastname}`}
-                        </td>
-                        <td>{appointment.type}</td>
-                        <td>
-                          <Badge 
-                            bg={getStatusBadgeVariant(appointment.status)}
-                            text={appointment.status === "WARNING" ? "dark" : "white"}
-                          >
-                            {appointment.status}
-                          </Badge>
-                        </td>
-                        <td>
-                          {appointment.status === "SCHEDULED" && (
-                            <>
-                              {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
-                                <Button
-                                  variant="success"
-                                  size="sm"
-                                  className="me-2"
-                                  onClick={() => handleStatusUpdate(appointment.id, "COMPLETED")}
-                                >
-                                  Mark Complete
-                                </Button>
-                              )}
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => handleDelete(appointment.id)}
-                              >
-                                Cancel
-                              </Button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                // For professionals (therapists and nutritionists), show tabs
+                <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+                  <Nav variant="tabs" className="mb-3">
+                    <Nav.Item>
+                      <Nav.Link eventKey="active">
+                        Active Appointments {activeAppointments.length > 0 && 
+                          <Badge bg="primary">{activeAppointments.length}</Badge>}
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="completed">
+                        Completed Appointments {completedAppointments.length > 0 && 
+                          <Badge bg="success">{completedAppointments.length}</Badge>}
+                      </Nav.Link>
+                    </Nav.Item>
+                  </Nav>
+                  <Tab.Content>
+                    <Tab.Pane eventKey="active">
+                      {activeAppointments.length === 0 ? (
+                        <div className="text-center p-3">
+                          <p className="mb-0">No active appointments found.</p>
+                        </div>
+                      ) : (
+                        <AppointmentTable
+                          appointments={activeAppointments}
+                          userRole={userRole}
+                          onStatusUpdate={handleStatusUpdate}
+                          onDelete={handleDelete}
+                        />
+                      )}
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="completed">
+                      {completedAppointments.length === 0 ? (
+                        <div className="text-center p-3">
+                          <p className="mb-0">No completed appointments found.</p>
+                        </div>
+                      ) : (
+                        <AppointmentTable
+                          appointments={completedAppointments}
+                          userRole={userRole}
+                          onStatusUpdate={handleStatusUpdate}
+                          onDelete={handleDelete}
+                        />
+                      )}
+                    </Tab.Pane>
+                  </Tab.Content>
+                </Tab.Container>
               )}
             </Card.Body>
           </Card>

@@ -252,9 +252,15 @@ export default class ApiService {
       const token = this.getAccessToken();
       if (!token) throw new Error('No authentication token found');
 
+      console.log('Sending status update request:', {
+        appointmentId,
+        status,
+        url: `${this.BASE_URL}/api/v1/appointments/${appointmentId}/status?status=${status}`
+      });
+
       const response = await axios.patch(
-        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/status`,
-        { status },
+        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/status?status=${status}`,
+        null,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -262,6 +268,8 @@ export default class ApiService {
           }
         }
       );
+
+      console.log('Status update response:', response.data);
       return response.data;
     } catch (error) {
       console.error('UpdateAppointmentStatus error:', error.response || error);
