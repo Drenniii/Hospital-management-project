@@ -7,6 +7,7 @@ import TableList from "views/Terapisti/TableList.js";
 import Typography from "views/User/Typography.js";
 import Notifications from "views/Notifications.js";
 import AdminDashboard from "views/Admin/AdminDashboard.js";
+import Settings from "views/Settings.js";
 
 // ==========================================
 // Merr rolin e përdoruesit nga localStorage
@@ -40,6 +41,17 @@ const commonRoutes = [
     name: "Notifications",
     icon: "nc-icon nc-bell-55",
     component: Notifications,
+    layout: "/admin",
+  },
+];
+
+// Hidden routes (accessible but not shown in sidebar)
+const hiddenRoutes = [
+  {
+    path: "/settings",
+    name: "Settings",
+    icon: "nc-icon nc-settings-gear-65",
+    component: Settings,
     layout: "/admin",
   },
 ];
@@ -93,16 +105,16 @@ const getRoutesByRole = () => {
   let routes;
   switch (role) {
     case "THERAPIST":
-      routes = [...commonRoutes, ...therapistRoutes];
+      routes = [...commonRoutes, ...therapistRoutes, ...hiddenRoutes];
       break;
     case "USER":
-      routes = [...commonRoutes, ...userRoutes];
+      routes = [...commonRoutes, ...userRoutes, ...hiddenRoutes];
       break;
     case "ADMIN":
-      routes = [...commonRoutes, ...adminRoutes];
+      routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
     default:
-      routes = [...commonRoutes];
+      routes = [...commonRoutes, ...hiddenRoutes];
   }
   
   console.log("Returned routes:", routes); // Debug log

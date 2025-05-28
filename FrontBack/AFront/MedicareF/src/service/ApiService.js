@@ -148,14 +148,18 @@ static async deleteTask(taskId) {
     localStorage.removeItem("userRole");
     localStorage.clear();
   }
-
-
-
-
-   
-
-  
-
-
-
+  static async changePassword(passwordData) {
+    const response = await axios.patch(
+      `${this.BASE_URL}/api/v1/users/change-password`,
+      {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmationPassword: passwordData.confirmationPassword
+      },
+      { 
+        headers: this.getHeaders()
+      }
+    );
+    return response.data;
+  }
 }
