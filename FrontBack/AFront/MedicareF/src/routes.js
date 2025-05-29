@@ -34,17 +34,23 @@ const commonRoutes = [
     layout: "/admin",
   },
   {
-    path: "/appointments",
-    name: "Appointments",
-    icon: "nc-icon nc-watch-time",
-    component: Appointments,
-    layout: "/admin",
-  },
-  {
     path: "/notifications",
     name: "Notifications",
     icon: "nc-icon nc-bell-55",
     component: Notifications,
+    layout: "/admin",
+  },
+];
+
+// ======================================
+// Rreshtat për appointments (non-admin)
+// ======================================
+const appointmentRoutes = [
+  {
+    path: "/appointments",
+    name: "Appointments",
+    icon: "nc-icon nc-watch-time",
+    component: Appointments,
     layout: "/admin",
   },
 ];
@@ -151,16 +157,16 @@ const getRoutesByRole = () => {
   let routes;
   switch (role) {
     case "THERAPIST":
-      routes = [...commonRoutes, ...therapistRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...appointmentRoutes, ...therapistRoutes, ...hiddenRoutes];
       break;
     case "USER":
-      routes = [...commonRoutes, ...userRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...appointmentRoutes, ...userRoutes, ...hiddenRoutes];
       break;
     case "ADMIN":
       routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
     case "NUTRITIONIST":
-      routes = [...commonRoutes, ...nutritionistRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
       break;
     default:
       routes = [...commonRoutes, ...hiddenRoutes];
