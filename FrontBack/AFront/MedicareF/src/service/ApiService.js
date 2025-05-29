@@ -7,8 +7,11 @@ export default class ApiService {
   // === Helper: get Authorization headers ===
   static getHeaders() {
     const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
     return {
-      Authorization: token ? `Bearer ${token}` : "",
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
   }
@@ -35,7 +38,15 @@ export default class ApiService {
     return response.data;
   }
 
-  /** TASK CRUD **/
+  static async logoutUser() {
+    const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, {
+      headers: this.getHeaders()
+    });
+    this.clearStorage();
+    return response.data;
+  }
+
+  // === TASK CRUD ===
 
   static async getAllTasks() {
     const response = await axios.get(`${this.BASE_URL}/api/v1/tasks`, {
@@ -72,14 +83,6 @@ export default class ApiService {
     return response.data;
   }
 
-  static async logoutUser() {
-    const response = await axios.post(`${this.BASE_URL}/api/v1/auth/logout`, {}, {
-      headers: this.getHeaders()
-    });
-    this.clearStorage();
-    return response.data;
-  }
-
   // === USER API ===
 
   static async getAllUsers() {
@@ -111,6 +114,39 @@ export default class ApiService {
       { headers: this.getHeaders() }
     );
     return response.data;
+  }
+
+  static async changePassword(passwordData) {
+    const response = await axios.patch(
+      `${this.BASE_URL}/api/v1/users/change-password`,
+      {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmationPassword: passwordData.confirmationPassword
+      },
+      {
+        headers: this.getHeaders()
+      }
+    );
+    return response.data;
+  }
+
+  /** Get Users by Role **/
+  static async getUsersByRole(role) {
+    const response = await axios.get(`${this.BASE_URL}/api/v1/users/role/${role}`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
+
+  /** Therapist API **/
+  static async getAllTherapists() {
+    return this.getUsersByRole("THERAPIST");
+  }
+
+  /** Nutritionist API **/
+  static async getAllNutritionists() {
+    return this.getUsersByRole("NUTRICIST");
   }
 
   // === Role Helpers ===
@@ -149,40 +185,8 @@ export default class ApiService {
     localStorage.clear();
   }
 
-  static async changePassword(passwordData) {
-    const response = await axios.patch(
-      `${this.BASE_URL}/api/v1/users/change-password`,
-      {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-        confirmationPassword: passwordData.confirmationPassword
-      },
-      {
-        headers: this.getHeaders()
-      }
-    );
-    return response.data;
-  }
+  // === Appointments ===
 
-  /** Get Users by Role **/
-  static async getUsersByRole(role) {
-    const response = await axios.get(`${this.BASE_URL}/api/v1/users/role/${role}`, {
-      headers: this.getHeaders()
-    });
-    return response.data;
-  }
-
-  /** Therapist API **/
-  static async getAllTherapists() {
-    return this.getUsersByRole("THERAPIST");
-  }
-
-  /** Nutritionist API **/
-  static async getAllNutritionists() {
-    return this.getUsersByRole("NUTRICIST");
-  }
-
-  /** Appointment API **/
   static async createAppointment(clientId, professionalId, appointmentDateTime, type, notes = "") {
     try {
       const formData = new FormData();
@@ -252,12 +256,6 @@ export default class ApiService {
       const token = this.getAccessToken();
       if (!token) throw new Error('No authentication token found');
 
-      console.log('Sending status update request:', {
-        appointmentId,
-        status,
-        url: `${this.BASE_URL}/api/v1/appointments/${appointmentId}/status?status=${status}`
-      });
-
       const response = await axios.patch(
         `${this.BASE_URL}/api/v1/appointments/${appointmentId}/status?status=${status}`,
         null,
@@ -269,7 +267,6 @@ export default class ApiService {
         }
       );
 
-      console.log('Status update response:', response.data);
       return response.data;
     } catch (error) {
       console.error('UpdateAppointmentStatus error:', error.response || error);
@@ -298,7 +295,8 @@ export default class ApiService {
     }
   }
 
-  // Add these methods to your ApiService class
+  // === Notifications ===
+
   static async getUserNotifications() {
     try {
       const response = await axios.get(`${this.BASE_URL}/api/notifications`, {
@@ -336,5 +334,73 @@ export default class ApiService {
       throw error;
     }
   }
+
+  // === Chat API ===
+  static async getChatRooms() {
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/api/v1/chat/rooms`,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error getting chat rooms:', error);
+      throw error;
+    }
+  }
+
+  static async createChatRoom(chatRoomData) {
+    try {
+      const response = await axios.post(
+        `${this.BASE_URL}/api/v1/chat/rooms/create`,
+        chatRoomData,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      throw error;
+    }
+  }
+
+  static async getChatMessages(chatRoomId) {
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/api/v1/chat/messages/${chatRoomId}`,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error getting chat messages:', error);
+      throw error;
+    }
+  }
+
+  static async sendMessage(messageData) {
+    try {
+      const response = await axios.post(
+        `${this.BASE_URL}/api/v1/chat/messages/send`,
+        messageData,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  }
+
+  static async markMessagesAsRead(chatRoomId) {
+    try {
+      const response = await axios.put(
+        `${this.BASE_URL}/api/v1/chat/messages/${chatRoomId}/read`,
+        {},
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+      throw error;
+    }
+  }
 }
-//api

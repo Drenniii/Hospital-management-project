@@ -12,6 +12,7 @@ import TherapistSelection from "views/User/TherapistSelection.js";
 import NutritionistSelection from "views/User/NutritionistSelection.js";
 import Appointments from "views/Appointments.js";
 import Settings from "views/Settings.js";
+import Chat from "components/Chat/Chat.js";
 
 // ==========================================
 // Merr rolin e përdoruesit nga localStorage
@@ -34,23 +35,17 @@ const commonRoutes = [
     layout: "/admin",
   },
   {
+    path: "/chat",
+    name: "Messages",
+    icon: "nc-icon nc-chat-33",
+    component: Chat,
+    layout: "/admin",
+  },
+  {
     path: "/notifications",
     name: "Notifications",
     icon: "nc-icon nc-bell-55",
     component: Notifications,
-    layout: "/admin",
-  },
-];
-
-// ======================================
-// Common routes for admin users
-// ======================================
-const commonAdminRoutes = [
-  {
-    path: "/user",
-    name: "Admin Profile",
-    icon: "nc-icon nc-circle-09",
-    component: UserProfile,
     layout: "/admin",
   },
 ];
@@ -147,9 +142,9 @@ const adminRoutes = [
   },
 ];
 
-// ====================
+// ============================
 // Rreshtat për NUTRICIONISTËT
-// ====================
+// ============================
 const nutritionistRoutes = [
   {
     path: "/dashboard",
@@ -176,7 +171,7 @@ const getRoutesByRole = () => {
       routes = [...commonRoutes, ...appointmentRoutes, ...userRoutes, ...hiddenRoutes];
       break;
     case "ADMIN":
-      routes = [...commonAdminRoutes, ...adminRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
     case "NUTRICIST":
       routes = [...commonRoutes, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
