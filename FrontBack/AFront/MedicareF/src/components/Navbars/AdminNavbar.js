@@ -4,12 +4,14 @@ import { Navbar, Container, Nav, Dropdown, Button } from "react-bootstrap";
 import routes from "routes.js";
 import ApiService from "../../service/ApiService";  // ✅ Adjust path based on your folder structure
 import DietPlans from "../DietPlans/DietPlans";
+import Psychology from "../Psychology/Psychology";
 
 function Header() {
   const location = useLocation();
   const history = useHistory(); // ✅ useHistory instead of useNavigate
   const [userRole, setUserRole] = useState("");
   const [showDietPlans, setShowDietPlans] = useState(false);
+  const [showPsychology, setShowPsychology] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -118,11 +120,17 @@ function Header() {
                     <Dropdown.Item onClick={() => navigateTo("/admin/appointments")}>
                       <i className="nc-icon nc-calendar-60 mr-2"></i>Appointments
                     </Dropdown.Item>
+                    <Dropdown.Item onClick={() => setShowPsychology(true)}>
+                      <i className="nc-icon nc-sound-wave mr-2"></i>Psychology Resources
+                    </Dropdown.Item>
                   </>
                 )}
 
                 {userRole === "NUTRICIST" && (
                   <>
+                    <Dropdown.Item onClick={() => navigateTo("/admin/appointments")}>
+                      <i className="nc-icon nc-calendar-60 mr-2"></i>Appointments
+                    </Dropdown.Item>
                     <Dropdown.Item onClick={() => setShowDietPlans(true)}>
                       <i className="nc-icon nc-paper-2 mr-2"></i>Diet Plans
                     </Dropdown.Item>
@@ -151,6 +159,7 @@ function Header() {
         </Navbar.Collapse>
       </Container>
       <DietPlans show={showDietPlans} onHide={() => setShowDietPlans(false)} />
+      <Psychology show={showPsychology} onHide={() => setShowPsychology(false)} />
     </Navbar>
   );
 }

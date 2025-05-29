@@ -15,6 +15,7 @@ import {
 } from "react-bootstrap";
 import ApiService from "service/ApiService";
 import DietPlans from "../components/DietPlans/DietPlans";
+import Psychology from "../components/Psychology/Psychology";
 
 // Custom Modal Styles
 const modalOverlayStyle = {
@@ -93,6 +94,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [viewPanelVisible, setViewPanelVisible] = useState(false);
   const [showDietPlans, setShowDietPlans] = useState(false);
+  const [showPsychology, setShowPsychology] = useState(false);
 
   const handleDelete = (appointmentId, status) => {
     const message = status === "COMPLETED" 
@@ -169,16 +171,31 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                         </Button>
                       </>
                     )}
-                    {userRole === "USER" && appointment.type === "NUTRITION" && (
-                      <Button
-                        variant="info"
-                        size="sm"
-                        className="me-2"
-                        onClick={() => setShowDietPlans(true)}
-                      >
-                        <i className="nc-icon nc-paper-2 mr-1"></i>
-                        View Diet Plans
-                      </Button>
+                    {userRole === "USER" && (
+                      <>
+                        {appointment.type === "NUTRITION" && (
+                          <Button
+                            variant="info"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => setShowDietPlans(true)}
+                          >
+                            <i className="nc-icon nc-paper-2 mr-1"></i>
+                            View Diet Plans
+                          </Button>
+                        )}
+                        {appointment.type === "THERAPY" && (
+                          <Button
+                            variant="info"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => setShowPsychology(true)}
+                          >
+                            <i className="nc-icon nc-sound-wave mr-1"></i>
+                            View Resources
+                          </Button>
+                        )}
+                      </>
                     )}
                     <Button
                       variant="danger"
@@ -209,15 +226,29 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                         </Button>
                       </>
                     )}
-                    {userRole === "USER" && appointment.type === "NUTRITION" && (
-                      <Button
-                        variant="info"
-                        size="sm"
-                        onClick={() => setShowDietPlans(true)}
-                      >
-                        <i className="nc-icon nc-paper-2 mr-1"></i>
-                        View Diet Plans
-                      </Button>
+                    {userRole === "USER" && (
+                      <>
+                        {appointment.type === "NUTRITION" && (
+                          <Button
+                            variant="info"
+                            size="sm"
+                            onClick={() => setShowDietPlans(true)}
+                          >
+                            <i className="nc-icon nc-paper-2 mr-1"></i>
+                            View Diet Plans
+                          </Button>
+                        )}
+                        {appointment.type === "THERAPY" && (
+                          <Button
+                            variant="info"
+                            size="sm"
+                            onClick={() => setShowPsychology(true)}
+                          >
+                            <i className="nc-icon nc-sound-wave mr-1"></i>
+                            View Resources
+                          </Button>
+                        )}
+                      </>
                     )}
                   </>
                 )}
@@ -236,6 +267,11 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
       <DietPlans 
         show={showDietPlans} 
         onHide={() => setShowDietPlans(false)} 
+      />
+
+      <Psychology 
+        show={showPsychology} 
+        onHide={() => setShowPsychology(false)} 
       />
     </>
   );
