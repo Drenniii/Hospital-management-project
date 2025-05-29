@@ -100,7 +100,7 @@ function Header() {
             </Nav.Item>
           </Nav>
           <Nav className="ml-auto" navbar>
-            <NotificationDropdown />
+            {userRole !== "ADMIN" && <NotificationDropdown />}
             <Dropdown as={Nav.Item}>
               <Dropdown.Toggle
                 as={Nav.Link}
@@ -111,7 +111,8 @@ function Header() {
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 <Dropdown.Item onClick={() => navigateTo("/admin/user")}>
-                  <i className="nc-icon nc-single-02 mr-2"></i>My Profile
+                  <i className="nc-icon nc-single-02 mr-2"></i>
+                  {userRole === "ADMIN" ? "Admin Profile" : "My Profile"}
                 </Dropdown.Item>
                 
                 {userRole === "ADMIN" && (

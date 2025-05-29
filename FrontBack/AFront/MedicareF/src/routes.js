@@ -43,6 +43,19 @@ const commonRoutes = [
 ];
 
 // ======================================
+// Common routes for admin users
+// ======================================
+const commonAdminRoutes = [
+  {
+    path: "/user",
+    name: "Admin Profile",
+    icon: "nc-icon nc-circle-09",
+    component: UserProfile,
+    layout: "/admin",
+  },
+];
+
+// ======================================
 // Rreshtat për appointments (non-admin)
 // ======================================
 const appointmentRoutes = [
@@ -163,7 +176,7 @@ const getRoutesByRole = () => {
       routes = [...commonRoutes, ...appointmentRoutes, ...userRoutes, ...hiddenRoutes];
       break;
     case "ADMIN":
-      routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
+      routes = [...commonAdminRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
     case "NUTRICIST":
       routes = [...commonRoutes, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
