@@ -1,0 +1,116 @@
+.diet-plan-card {
+  transition: transform 0.2s ease-in-out;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border: none;
+}
+
+.diet-plan-card:hover {
+  transform: translateY(-5px);
+}
+
+.diet-plan-icon-container {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.diet-plan-icon {
+  font-size: 40px;
+  opacity: 0.9;
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+.diet-plan-icon.center {
+  font-size: 64px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.diet-plan-icon.top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.diet-plan-icon.top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.diet-plan-icon.bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+.diet-plan-icon.bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.diet-plan-card:hover .diet-plan-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.diet-plan-card:hover .diet-plan-icon.center {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.modal-xl {
+  max-width: 90%;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #2c3e50;
+}
+
+.card-text {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 2rem;
+  background-color: #ffffff;
+}
+
+.row {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+
+.col {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.close:hover {
+  opacity: 0.7;
+} 

@@ -3,11 +3,13 @@ import { useLocation, useHistory } from "react-router-dom"; // ✅ useHistory fo
 import { Navbar, Container, Nav, Dropdown, Button } from "react-bootstrap";
 import routes from "routes.js";
 import ApiService from "../../service/ApiService";  // ✅ Adjust path based on your folder structure
+import DietPlans from "../DietPlans/DietPlans";
 
 function Header() {
   const location = useLocation();
   const history = useHistory(); // ✅ useHistory instead of useNavigate
   const [userRole, setUserRole] = useState("");
+  const [showDietPlans, setShowDietPlans] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -108,9 +110,6 @@ function Header() {
                     <Dropdown.Item onClick={() => navigateTo("/admin/adminDashboard")}>
                       <i className="nc-icon nc-chart-pie-35 mr-2"></i>Dashboard
                     </Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigateTo("/admin/users")}>
-                      <i className="nc-icon nc-badge mr-2"></i>Manage Users
-                    </Dropdown.Item>
                   </>
                 )}
 
@@ -119,19 +118,13 @@ function Header() {
                     <Dropdown.Item onClick={() => navigateTo("/admin/appointments")}>
                       <i className="nc-icon nc-calendar-60 mr-2"></i>Appointments
                     </Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigateTo("/admin/patients")}>
-                      <i className="nc-icon nc-single-02 mr-2"></i>Patients
-                    </Dropdown.Item>
                   </>
                 )}
 
                 {userRole === "NUTRICIST" && (
                   <>
-                    <Dropdown.Item onClick={() => navigateTo("/admin/diet-plans")}>
+                    <Dropdown.Item onClick={() => setShowDietPlans(true)}>
                       <i className="nc-icon nc-paper-2 mr-2"></i>Diet Plans
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigateTo("/admin/nutritionist-patients")}>
-                      <i className="nc-icon nc-single-02 mr-2"></i>Patients
                     </Dropdown.Item>
                   </>
                 )}
@@ -157,6 +150,7 @@ function Header() {
           </Nav>
         </Navbar.Collapse>
       </Container>
+      <DietPlans show={showDietPlans} onHide={() => setShowDietPlans(false)} />
     </Navbar>
   );
 }
