@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, ListGroup, Button, Form } from 'react-bootstrap';
+import { Card, Form, Button, ListGroup } from 'react-bootstrap';
 import ApiService from '../../service/ApiService';
 import './Chat.css';
 
@@ -119,13 +119,55 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const loadAvailableUsers = async () => {
+    try {
+      let users = [];
+      if (userRole === 'USER') {
+        const therapists = await ApiService.getAllTherapists();
+        const nutritionists = await ApiService.getAllNutritionists();
+        users = [...therapists, ...nutritionists];
+      } else if (userRole === 'THERAPIST' || userRole === 'NUTRICIST') {
+        const patients = await ApiService.getUsersByRole('USER');
+        users = patients;
+      }
+      setAvailableUsers(users);
+    } catch (error) {
+      console.error('Error loading available users:', error);
+      setAvailableUsers([]);
+    }
+  };
+
+  const handleStartNewChat = async () => {
+    if (!selectedUser || !currentUser) return;
+    
+    try {
+      const chatRoomData = {
+        userId: userRole === 'USER' ? currentUser.id : selectedUser.id,
+        professionalId: userRole === 'USER' ? selectedUser.id : currentUser.id
+      };
+
+      const newChatRoom = await ApiService.createChatRoom(chatRoomData);
+      
+      if (newChatRoom) {
+        await loadChatRooms();
+        setActiveChatRoom(newChatRoom);
+        setShowNewChatPanel(false);
+        setSelectedUser(null);
+      }
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      alert('Failed to create chat room. Please try again.');
+    }
+  };
+
   const loadChatRooms = async () => {
     try {
       const rooms = await ApiService.getChatRooms();
-      setChatRooms(rooms);
+      setChatRooms(Array.isArray(rooms) ? rooms : []);
       setLoading(false);
     } catch (error) {
       console.error('Error loading chat rooms:', error);
+      setChatRooms([]);
       setLoading(false);
     }
   };
@@ -133,61 +175,41 @@ const Chat = () => {
   const loadMessages = async (chatRoomId) => {
     try {
       const messages = await ApiService.getChatMessages(chatRoomId);
-      setMessages(messages);
+      setMessages(Array.isArray(messages) ? messages : []);
     } catch (error) {
       console.error('Error loading messages:', error);
-    }
-  };
-
-  const loadAvailableUsers = async () => {
-    try {
-      const users = userRole === 'USER' 
-        ? await ApiService.getAllProfessionals()
-        : await ApiService.getAllUsers();
-      setAvailableUsers(users);
-    } catch (error) {
-      console.error('Error loading available users:', error);
+      setMessages([]);
     }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !activeChatRoom) return;
+    if (!newMessage.trim() || !activeChatRoom || !currentUser) return;
 
     try {
-      await ApiService.sendMessage({
-        chatRoomId: activeChatRoom.id,
+      const messageData = {
+        senderId: currentUser.id,
+        receiverId: userRole === 'USER' ? activeChatRoom.professional.id : activeChatRoom.user.id,
         content: newMessage
-      });
+      };
+
+      await ApiService.sendMessage(messageData);
       setNewMessage('');
-      loadMessages(activeChatRoom.id);
+      await loadMessages(activeChatRoom.id);
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
-  const handleCreateChatRoom = async () => {
-    if (!selectedUser) return;
-
-    try {
-      const newRoom = await ApiService.createChatRoom({
-        otherUserId: selectedUser.id
-      });
-      setChatRooms([...chatRooms, newRoom]);
-      setActiveChatRoom(newRoom);
-      setShowNewChatPanel(false);
-      setSelectedUser(null);
-    } catch (error) {
-      console.error('Error creating chat room:', error);
-    }
-  };
-
-  const formatName = (user) => {
-    return `${user.firstname} ${user.lastname}`;
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
   if (loading) {
-    return <div className="chat-loading">Loading chat...</div>;
+    return <div className="chat-loading">Loading...</div>;
   }
 
   return (
@@ -196,22 +218,20 @@ const Chat = () => {
         <div className="chat-layout">
           {/* Chat Rooms List */}
           <div className="chat-rooms">
-            <div className="chat-rooms-header">
-              <div className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Conversations</h5>
-                <Button 
-                  variant="primary" 
-                  size="sm"
-                  onClick={() => {
-                    loadAvailableUsers();
-                    setShowNewChatPanel(true);
-                  }}
-                >
-                  New Chat
-                </Button>
-              </div>
+            <div className="chat-rooms-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Conversations</h5>
+              <Button 
+                variant="primary" 
+                size="sm"
+                onClick={() => {
+                  loadAvailableUsers();
+                  setShowNewChatPanel(true);
+                }}
+              >
+                New Chat
+              </Button>
             </div>
-            <ListGroup className="chat-rooms-list">
+            <ListGroup>
               {chatRooms.map((room) => (
                 <ListGroup.Item
                   key={room.id}
@@ -222,9 +242,12 @@ const Chat = () => {
                   <div className="chat-room-info">
                     <span className="chat-room-name">
                       {userRole === 'USER' 
-                        ? formatName(room.professional)
-                        : formatName(room.user)}
+                        ? `${room.professional.firstname} ${room.professional.lastname}`
+                        : `${room.user.firstname} ${room.user.lastname}`}
                     </span>
+                    {room.unreadCount > 0 && (
+                      <span className="unread-badge">{room.unreadCount}</span>
+                    )}
                   </div>
                 </ListGroup.Item>
               ))}
@@ -232,88 +255,69 @@ const Chat = () => {
           </div>
 
           {/* Messages Area */}
-          <div className="messages-area">
+          <div className="chat-messages-container">
             {activeChatRoom ? (
               <>
-                <div className="messages-header">
-                  <h5 className="mb-0">
+                <div className="chat-header">
+                  <h5>
                     {userRole === 'USER'
-                      ? formatName(activeChatRoom.professional)
-                      : formatName(activeChatRoom.user)}
+                      ? `${activeChatRoom.professional.firstname} ${activeChatRoom.professional.lastname}`
+                      : `${activeChatRoom.user.firstname} ${activeChatRoom.user.lastname}`}
                   </h5>
                 </div>
-                <div className="messages-container">
+                
+                <div className="messages-area">
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`message ${
-                        message.sender.id === currentUser?.id ? 'sent' : 'received'
+                        message.sender.id === currentUser.id ? 'sent' : 'received'
                       }`}
                     >
-                      {message.content}
+                      <div className="message-content">
+                        <p>{message.content}</p>
+                        <span className="message-time">
+                          {formatTimestamp(message.sentAt)}
+                        </span>
+                      </div>
                     </div>
                   ))}
                   <div ref={messagesEndRef} />
                 </div>
-                <Form onSubmit={handleSendMessage} className="message-input-container">
-                  <Form.Control
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className="message-input"
-                  />
-                  <Button type="submit" variant="primary">
-                    Send
-                  </Button>
+
+                <Form onSubmit={handleSendMessage} className="message-input-form">
+                  <Form.Group className="message-input-group">
+                    <Form.Control
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message..."
+                      className="message-input"
+                    />
+                    <Button type="submit" disabled={!newMessage.trim()}>
+                      Send
+                    </Button>
+                  </Form.Group>
                 </Form>
               </>
             ) : (
-              <div className="d-flex align-items-center justify-content-center h-100 text-muted">
-                Select a conversation or start a new one
+              <div className="no-chat-selected">
+                <p>Select a conversation to start chatting</p>
               </div>
             )}
           </div>
-
-          {/* New Chat Panel */}
-          {showNewChatPanel && (
-            <div className="new-chat-panel">
-              <div className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">New Chat</h5>
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => setShowNewChatPanel(false)}
-                >
-                  Close
-                </Button>
-              </div>
-              <div className="user-list">
-                <ListGroup>
-                  {availableUsers.map((user) => (
-                    <ListGroup.Item
-                      key={user.id}
-                      onClick={() => setSelectedUser(user)}
-                      className={`user-item ${
-                        selectedUser?.id === user.id ? 'selected' : ''
-                      }`}
-                    >
-                      {formatName(user)}
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              </div>
-              <Button
-                variant="primary"
-                onClick={handleCreateChatRoom}
-                disabled={!selectedUser}
-              >
-                Start Chat
-              </Button>
-            </div>
-          )}
         </div>
       </Card>
+
+      {/* New Chat Panel */}
+      <NewChatPanel
+        show={showNewChatPanel}
+        onClose={() => setShowNewChatPanel(false)}
+        availableUsers={availableUsers}
+        selectedUser={selectedUser}
+        onUserSelect={setSelectedUser}
+        onStartChat={handleStartNewChat}
+      />
     </div>
   );
 };
