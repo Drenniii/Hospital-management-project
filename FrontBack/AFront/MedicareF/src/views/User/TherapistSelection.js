@@ -19,12 +19,13 @@ const modalOverlayStyle = {
 
 const modalContentStyle = {
   backgroundColor: "white",
-  padding: "20px",
-  borderRadius: "8px",
-  width: "400px",
-  maxHeight: "80vh",
+  padding: "30px",
+  borderRadius: "16px",
+  width: "600px",
+  maxHeight: "85vh",
   overflowY: "auto",
-  boxShadow: "0 5px 15px rgba(0,0,0,.5)",
+  boxShadow: "0 10px 25px rgba(0,0,0,.2)",
+  animation: "modalFadeIn 0.3s ease-out",
 };
 
 // Add default profile icon styles
@@ -38,6 +39,102 @@ const defaultProfileStyle = {
   color: '#0d6efd',
   borderRadius: '4px 4px 0 0'
 };
+
+// Add new styles
+const sectionStyle = {
+  backgroundColor: "#f8f9fa",
+  borderRadius: "12px",
+  padding: "20px",
+  marginBottom: "20px",
+  border: "1px solid #e9ecef",
+  transition: "transform 0.2s ease",
+  cursor: "default",
+  boxShadow: "0 2px 4px rgba(0,0,0,.05)",
+};
+
+const imageContainerStyle = {
+  position: "relative",
+  width: "180px",
+  height: "180px",
+  margin: "0 auto 2rem",
+  borderRadius: "50%",
+  boxShadow: "0 4px 15px rgba(0,0,0,.1)",
+  border: "3px solid #0d6efd",
+  overflow: "hidden",
+  transition: "transform 0.3s ease",
+};
+
+// Add keyframes for modal animation
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .profile-section:hover {
+    transform: translateY(-2px);
+  }
+
+  .profile-image-container:hover {
+    transform: scale(1.02);
+  }
+
+  .profile-details h6 {
+    color: #0d6efd;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #0d6efd22;
+    padding-bottom: 0.5rem;
+  }
+
+  .profile-details p {
+    color: #495057;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .close-button:hover {
+    color: #0d6efd;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar-thumb {
+    background: #0d6efd55;
+    border-radius: 4px;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar-thumb:hover {
+    background: #0d6efd;
+  }
+`;
+document.head.appendChild(styleSheet);
 
 function BookingModal({ show, onClose, therapist, onConfirm }) {
   const [selectedDate, setSelectedDate] = useState("");
@@ -184,17 +281,149 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
   );
 }
 
+// Add TherapistProfileModal component
+function TherapistProfileModal({ show, onClose, therapist }) {
+  if (!show || !therapist) return null;
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div 
+        style={modalContentStyle} 
+        onClick={(e) => e.stopPropagation()}
+        className="modal-content-scroll"
+      >
+        <button className="close-button" onClick={onClose}>×</button>
+        
+        <div style={imageContainerStyle} className="profile-image-container">
+          {therapist.image ? (
+            <img 
+              src={therapist.image}
+              alt={`${therapist.firstname} ${therapist.lastname}`}
+              style={{ 
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#f8f9fa',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '60px',
+              color: '#0d6efd'
+            }}>
+              <i className="fas fa-user-md"></i>
+            </div>
+          )}
+        </div>
+
+        <div className="profile-details">
+          <h3 className="text-center mb-4" style={{ color: '#0d6efd' }}>
+            {therapist.firstname} {therapist.lastname}
+          </h3>
+          
+          {therapist.description && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-comment-medical me-2"></i>
+                Description
+              </h6>
+              <p>{therapist.description}</p>
+            </div>
+          )}
+
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-address-card" style={{ marginRight: '20px' }}></i>
+              Contact Information
+            </h6>
+            <p><strong>Email:</strong> {therapist.email}</p>
+            {therapist.phoneNumber && <p><strong>Phone:</strong> {therapist.phoneNumber}</p>}
+            {therapist.address && <p><strong>Address:</strong> {therapist.address}</p>}
+          </div>
+
+          {therapist.specialization && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-star me-2"></i>
+                Specialization
+              </h6>
+              <p>{therapist.specialization}</p>
+            </div>
+          )}
+
+          {therapist.experience && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-briefcase me-2"></i>
+                Experience
+              </h6>
+              <p>{therapist.experience}</p>
+            </div>
+          )}
+
+          {therapist.education && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-graduation-cap me-2"></i>
+                Education
+              </h6>
+              <p>{therapist.education}</p>
+            </div>
+          )}
+
+          {therapist.about && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-user" style={{ marginRight: '20px' }}></i>
+                About
+              </h6>
+              <p>{therapist.about}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="text-center mt-4">
+          <Button 
+            variant="primary" 
+            onClick={onClose}
+            className="px-4 py-2"
+            style={{
+              borderRadius: '50px',
+              fontSize: '1.1rem',
+              boxShadow: '0 2px 5px rgba(0,0,0,.1)',
+            }}
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TherapistSelection() {
   const history = useHistory();
   const [therapists, setTherapists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedTherapist, setSelectedTherapist] = useState(null);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = ApiService.getAccessToken();
+    if (!token) {
+      history.push("/login");
+      return;
+    }
     loadTherapists();
-  }, []);
+  }, [history]);
 
   const loadTherapists = async () => {
     try {
@@ -235,6 +464,17 @@ function TherapistSelection() {
   const handleConfirmBooking = async () => {
     // Reload therapists to refresh any availability changes
     await loadTherapists();
+  };
+
+  const handleViewProfile = (therapist) => {
+    // Check if user is logged in
+    const token = ApiService.getAccessToken();
+    if (!token) {
+      history.push("/login");
+      return;
+    }
+    setSelectedTherapist(therapist);
+    setShowProfileModal(true);
   };
 
   if (loading) {
@@ -302,7 +542,7 @@ function TherapistSelection() {
                 >
                   <i className="fas fa-user-md"></i>
                 </div>
-                <Card.Body>
+                <Card.Body className="d-flex flex-column">
                   <Card.Title className="d-flex justify-content-between align-items-center">
                     {`${therapist.firstname} ${therapist.lastname}`}
                   </Card.Title>
@@ -315,7 +555,7 @@ function TherapistSelection() {
                       <><strong>Address:</strong> {therapist.address}<br/></>
                     )}
                   </Card.Text>
-                  <div className="d-grid gap-2">
+                  <div className="mt-auto d-grid gap-2">
                     <Button 
                       variant="outline-primary"
                       onClick={() => handleBooking(therapist)}
@@ -324,10 +564,7 @@ function TherapistSelection() {
                     </Button>
                     <Button 
                       variant="outline-secondary"
-                      onClick={() => {
-                        // Add view profile logic here
-                        alert('View profile functionality will be implemented soon!');
-                      }}
+                      onClick={() => handleViewProfile(therapist)}
                     >
                       View Full Profile
                     </Button>
@@ -344,6 +581,12 @@ function TherapistSelection() {
         onClose={() => setShowBookingModal(false)}
         therapist={selectedTherapist}
         onConfirm={handleConfirmBooking}
+      />
+
+      <TherapistProfileModal
+        show={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        therapist={selectedTherapist}
       />
     </Container>
   );

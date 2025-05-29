@@ -19,12 +19,13 @@ const modalOverlayStyle = {
 
 const modalContentStyle = {
   backgroundColor: "white",
-  padding: "20px",
-  borderRadius: "8px",
-  width: "400px",
-  maxHeight: "80vh",
+  padding: "30px",
+  borderRadius: "16px",
+  width: "600px",
+  maxHeight: "85vh",
   overflowY: "auto",
-  boxShadow: "0 5px 15px rgba(0,0,0,.5)",
+  boxShadow: "0 10px 25px rgba(0,0,0,.2)",
+  animation: "modalFadeIn 0.3s ease-out",
 };
 
 // Add default profile icon styles
@@ -38,6 +39,102 @@ const defaultProfileStyle = {
   color: '#198754', // Bootstrap success color for nutritionists
   borderRadius: '4px 4px 0 0'
 };
+
+// Add new styles
+const sectionStyle = {
+  backgroundColor: "#f8f9fa",
+  borderRadius: "12px",
+  padding: "20px",
+  marginBottom: "20px",
+  border: "1px solid #e9ecef",
+  transition: "transform 0.2s ease",
+  cursor: "default",
+  boxShadow: "0 2px 4px rgba(0,0,0,.05)",
+};
+
+const imageContainerStyle = {
+  position: "relative",
+  width: "180px",
+  height: "180px",
+  margin: "0 auto 2rem",
+  borderRadius: "50%",
+  boxShadow: "0 4px 15px rgba(0,0,0,.1)",
+  border: "3px solid #198754",
+  overflow: "hidden",
+  transition: "transform 0.3s ease",
+};
+
+// Add keyframes for modal animation
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .profile-section:hover {
+    transform: translateY(-2px);
+  }
+
+  .profile-image-container:hover {
+    transform: scale(1.02);
+  }
+
+  .profile-details h6 {
+    color: #198754;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #19875422;
+    padding-bottom: 0.5rem;
+  }
+
+  .profile-details p {
+    color: #495057;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .close-button:hover {
+    color: #198754;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar-thumb {
+    background: #19875455;
+    border-radius: 4px;
+  }
+
+  .modal-content-scroll::-webkit-scrollbar-thumb:hover {
+    background: #198754;
+  }
+`;
+document.head.appendChild(styleSheet);
 
 function BookingModal({ show, onClose, nutricist, onConfirm }) {
   const [selectedDate, setSelectedDate] = useState("");
@@ -184,17 +281,149 @@ function BookingModal({ show, onClose, nutricist, onConfirm }) {
   );
 }
 
+// Add NutritionistProfileModal component
+function NutritionistProfileModal({ show, onClose, nutritionist }) {
+  if (!show || !nutritionist) return null;
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div 
+        style={modalContentStyle} 
+        onClick={(e) => e.stopPropagation()}
+        className="modal-content-scroll"
+      >
+        <button className="close-button" onClick={onClose}>×</button>
+        
+        <div style={imageContainerStyle} className="profile-image-container">
+          {nutritionist.image ? (
+            <img 
+              src={nutritionist.image}
+              alt={`${nutritionist.firstname} ${nutritionist.lastname}`}
+              style={{ 
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#f8f9fa',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '60px',
+              color: '#198754'
+            }}>
+              <i className="fas fa-user-nurse"></i>
+            </div>
+          )}
+        </div>
+
+        <div className="profile-details">
+          <h3 className="text-center mb-4" style={{ color: '#198754' }}>
+            {nutritionist.firstname} {nutritionist.lastname}
+          </h3>
+          
+          {nutritionist.description && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-comment-medical me-2"></i>
+                Description
+              </h6>
+              <p>{nutritionist.description}</p>
+            </div>
+          )}
+
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-address-card" style={{ marginRight: '20px' }}></i>
+              Contact Information
+            </h6>
+            <p><strong>Email:</strong> {nutritionist.email}</p>
+            {nutritionist.phoneNumber && <p><strong>Phone:</strong> {nutritionist.phoneNumber}</p>}
+            {nutritionist.address && <p><strong>Address:</strong> {nutritionist.address}</p>}
+          </div>
+
+          {nutritionist.specialization && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-star me-2"></i>
+                Specialization
+              </h6>
+              <p>{nutritionist.specialization}</p>
+            </div>
+          )}
+
+          {nutritionist.experience && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-briefcase me-2"></i>
+                Experience
+              </h6>
+              <p>{nutritionist.experience}</p>
+            </div>
+          )}
+
+          {nutritionist.education && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-graduation-cap me-2"></i>
+                Education
+              </h6>
+              <p>{nutritionist.education}</p>
+            </div>
+          )}
+
+          {nutritionist.about && (
+            <div style={sectionStyle} className="profile-section">
+              <h6>
+                <i className="fas fa-user" style={{ marginRight: '20px' }}></i>
+                About
+              </h6>
+              <p>{nutritionist.about}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="text-center mt-4">
+          <Button 
+            variant="success" 
+            onClick={onClose}
+            className="px-4 py-2"
+            style={{
+              borderRadius: '50px',
+              fontSize: '1.1rem',
+              boxShadow: '0 2px 5px rgba(0,0,0,.1)',
+            }}
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function NutritionistSelection() {
   const history = useHistory();
   const [nutritionists, setNutritionists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedNutricist, setSelectedNutricist] = useState(null);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = ApiService.getAccessToken();
+    if (!token) {
+      history.push("/login");
+      return;
+    }
     loadNutritionists();
-  }, []);
+  }, [history]);
 
   const loadNutritionists = async () => {
     try {
@@ -237,6 +466,17 @@ function NutritionistSelection() {
     await loadNutritionists();
   };
 
+  const handleViewProfile = (nutritionist) => {
+    // Check if user is logged in
+    const token = ApiService.getAccessToken();
+    if (!token) {
+      history.push("/login");
+      return;
+    }
+    setSelectedNutricist(nutritionist);
+    setShowProfileModal(true);
+  };
+
   if (loading) {
     return (
       <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
@@ -270,7 +510,7 @@ function NutritionistSelection() {
     <Container fluid>
       <Row className="mb-4">
         <Col md="12">
-          <h4>Select a Nutricist</h4>
+          <h4>Select a Nutritionist</h4>
           <p>Choose from our certified nutrition experts</p>
         </Col>
       </Row>
@@ -278,7 +518,7 @@ function NutritionistSelection() {
         {nutritionists.length === 0 ? (
           <Col>
             <div className="alert alert-info">
-              No nutricists available at the moment. Please check back later.
+              No nutritionists available at the moment. Please check back later.
             </div>
           </Col>
         ) : (
@@ -302,7 +542,7 @@ function NutritionistSelection() {
                 >
                   <i className="fas fa-user-nurse"></i>
                 </div>
-                <Card.Body>
+                <Card.Body className="d-flex flex-column">
                   <Card.Title className="d-flex justify-content-between align-items-center">
                     {`${nutritionist.firstname} ${nutritionist.lastname}`}
                   </Card.Title>
@@ -315,7 +555,7 @@ function NutritionistSelection() {
                       <><strong>Address:</strong> {nutritionist.address}<br/></>
                     )}
                   </Card.Text>
-                  <div className="d-grid gap-2">
+                  <div className="mt-auto d-grid gap-2">
                     <Button 
                       variant="outline-success"
                       onClick={() => handleBooking(nutritionist)}
@@ -324,10 +564,7 @@ function NutritionistSelection() {
                     </Button>
                     <Button 
                       variant="outline-secondary"
-                      onClick={() => {
-                        // Add view profile logic here
-                        alert('View profile functionality will be implemented soon!');
-                      }}
+                      onClick={() => handleViewProfile(nutritionist)}
                     >
                       View Full Profile
                     </Button>
@@ -344,6 +581,12 @@ function NutritionistSelection() {
         onClose={() => setShowBookingModal(false)}
         nutricist={selectedNutricist}
         onConfirm={handleConfirmBooking}
+      />
+
+      <NutritionistProfileModal
+        show={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        nutritionist={selectedNutricist}
       />
     </Container>
   );
