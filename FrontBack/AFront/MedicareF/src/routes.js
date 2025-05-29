@@ -165,7 +165,7 @@ const getRoutesByRole = () => {
     case "ADMIN":
       routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
-    case "NUTRITIONIST":
+    case "NUTRICIST":
       routes = [...commonRoutes, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
       break;
     default:
