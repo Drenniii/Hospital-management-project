@@ -90,18 +90,6 @@ function Header() {
             </Nav.Item>
           </Nav>
           <Nav className="ml-auto" navbar>
-            <Nav.Item>
-              <Nav.Link
-                className="m-0"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLogout();
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <span className="no-icon">Log out</span>
-              </Nav.Link>
-            </Nav.Item>
             <Dropdown as={Nav.Item}>
               <Dropdown.Toggle
                 as={Nav.Link}
@@ -154,6 +142,18 @@ function Header() {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+            <Nav.Item>
+              <Nav.Link
+                className="m-0"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogout();
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <span className="no-icon">Log out</span>
+              </Nav.Link>
+            </Nav.Item>
           </Nav>
         </Navbar.Collapse>
       </Container>
