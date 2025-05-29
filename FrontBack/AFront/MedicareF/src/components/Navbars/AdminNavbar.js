@@ -56,6 +56,10 @@ function Header() {
     history.push(path);
   };
 
+  const capitalizeFirstLetter = (string) => {
+    return string ? string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() : 'Profile';
+  };
+
   return (
     <Navbar bg="light" expand="lg">
       <Container fluid>
@@ -100,7 +104,7 @@ function Header() {
                 className="m-0"
               >
                 <i className="nc-icon nc-circle-09 mr-1"></i>
-                <span>{userRole ? userRole.toLowerCase() : 'Profile'}</span>
+                <span>{capitalizeFirstLetter(userRole)}</span>
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 <Dropdown.Item onClick={() => navigateTo("/admin/user")}>
