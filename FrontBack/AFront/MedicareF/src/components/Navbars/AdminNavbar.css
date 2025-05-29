@@ -1,0 +1,82 @@
+.navbar .navbar-nav {
+  display: flex;
+  align-items: center;
+  height: 50px;
+}
+
+.navbar .navbar-nav .nav-item,
+.navbar .navbar-nav .notification-dropdown {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.navbar .navbar-nav .nav-link,
+.navbar .navbar-nav .notification-toggle {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 15px;
+}
+
+/* Fix for notification icon alignment */
+.navbar .navbar-nav .notification-toggle .nc-icon {
+  margin: 0;
+  line-height: 1;
+  font-size: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  top: 0;
+}
+
+/* Fix dropdown alignment */
+.navbar .navbar-nav .dropdown {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.navbar .navbar-nav .dropdown .nav-link {
+  padding: 0 15px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.navbar .navbar-nav .dropdown .nav-link i.nc-icon {
+  margin: 0;
+  line-height: 1;
+  font-size: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  top: 0;
+}
+
+/* Remove any default margins that might affect alignment */
+.navbar .navbar-nav .nav-link,
+.navbar .navbar-nav .dropdown-toggle,
+.navbar .navbar-nav .notification-toggle {
+  margin: 0;
+}
+
+/* Ensure icons and text are vertically centered */
+.navbar .navbar-nav .nav-link i,
+.navbar .navbar-nav .nav-link span,
+.navbar .navbar-nav .notification-toggle i {
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure consistent spacing between navbar items */
+.navbar .navbar-nav > * + * {
+  margin-left: 5px;
+}
+
+/* Override any bootstrap margins */
+.navbar .navbar-nav .m-0 {
+  margin: 0 !important;
+} 

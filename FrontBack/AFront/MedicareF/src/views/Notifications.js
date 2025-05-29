@@ -1,6 +1,7 @@
 import React from "react";
 // react plugin for creating notifications over the dashboard
 import NotificationAlert from "react-notification-alert";
+import "../components/Notifications/NotificationAlert.css";
 // react-bootstrap components
 import {
   Alert,
@@ -40,20 +41,20 @@ function Notifications() {
       default:
         break;
     }
-    var options = {};
-    options = {
+    var options = {
       place: place,
       message: (
-        <div>
-          <div>
-            Welcome to <b>Light Bootstrap Dashboard React</b> - a beautiful
-            freebie for every web developer.
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', maxWidth: '100%' }}>
+          <i className="nc-icon nc-bell-55" style={{ fontSize: '20px', marginTop: '2px' }}></i>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            Welcome to <b>Light Bootstrap Dashboard React</b> - a beautiful freebie for every web developer.
           </div>
         </div>
       ),
       type: type,
-      icon: "nc-icon nc-bell-55",
+      icon: false,
       autoDismiss: 7,
+      className: 'notification-alert'
     };
     notificationAlertRef.current.notificationAlert(options);
   };
@@ -232,34 +233,34 @@ function Notifications() {
               </Row>
               <Row className="justify-content-center">
                 <Col lg="3" md="3">
-                  <Button block onClick={() => notify("tl")} variant="default">
+                  <Button className="w-100" onClick={() => notify("tl")} variant="default">
                     Top Left
                   </Button>
                 </Col>
                 <Col lg="3" md="3">
-                  <Button block onClick={() => notify("tc")} variant="default">
+                  <Button className="w-100" onClick={() => notify("tc")} variant="default">
                     Top Center
                   </Button>
                 </Col>
                 <Col lg="3" md="3">
-                  <Button block onClick={() => notify("tr")} variant="default">
+                  <Button className="w-100" onClick={() => notify("tr")} variant="default">
                     Top Right
                   </Button>
                 </Col>
               </Row>
               <Row className="justify-content-center">
                 <Col lg="3" md="3">
-                  <Button block onClick={() => notify("bl")} variant="default">
+                  <Button className="w-100" onClick={() => notify("bl")} variant="default">
                     Bottom Left
                   </Button>
                 </Col>
                 <Col lg="3" md="3">
-                  <Button block onClick={() => notify("bc")} variant="default">
+                  <Button className="w-100" onClick={() => notify("bc")} variant="default">
                     Bottom Center
                   </Button>
                 </Col>
                 <Col lg="3" md="3">
-                  <Button block onClick={() => notify("br")} variant="default">
+                  <Button className="w-100" onClick={() => notify("br")} variant="default">
                     Bottom Right
                   </Button>
                 </Col>

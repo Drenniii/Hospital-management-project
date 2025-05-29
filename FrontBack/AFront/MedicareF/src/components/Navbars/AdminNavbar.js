@@ -5,6 +5,8 @@ import routes from "routes.js";
 import ApiService from "../../service/ApiService";  // ✅ Adjust path based on your folder structure
 import DietPlans from "../DietPlans/DietPlans";
 import Psychology from "../Psychology/Psychology";
+import NotificationDropdown from "../Notifications/NotificationDropdown";
+import "./AdminNavbar.css";  // Import the new CSS file
 
 function Header() {
   const location = useLocation();
@@ -98,6 +100,7 @@ function Header() {
             </Nav.Item>
           </Nav>
           <Nav className="ml-auto" navbar>
+            <NotificationDropdown />
             <Dropdown as={Nav.Item}>
               <Dropdown.Toggle
                 as={Nav.Link}

@@ -297,5 +297,44 @@ export default class ApiService {
       throw error;
     }
   }
+
+  // Add these methods to your ApiService class
+  static async getUserNotifications() {
+    try {
+      const response = await axios.get(`${this.BASE_URL}/api/notifications`, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      throw error;
+    }
+  }
+
+  static async getUnreadNotificationsCount() {
+    try {
+      const response = await axios.get(`${this.BASE_URL}/api/notifications/unread-count`, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching unread notifications count:', error);
+      throw error;
+    }
+  }
+
+  static async markNotificationAsRead(notificationId) {
+    try {
+      const response = await axios.put(
+        `${this.BASE_URL}/api/notifications/${notificationId}/mark-read`,
+        {},
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  }
 }
 //api

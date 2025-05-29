@@ -1,14 +1,53 @@
-.rna-container{
+.rna-container {
   .alert {
     border-radius: 4px;
-    button.close{
+    max-width: 400px;
+    width: 100%;
+    word-wrap: break-word;
+    white-space: normal;
+    margin: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+    button.close {
       color: #000;
       display: flex;
       justify-content: center;
       align-items: center;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+
       span {
         margin-top: -4px;
       }
     }
+
+    .alert-message {
+      padding: 8px 15px;
+      display: flex;
+      align-items: flex-start;
+
+      .nc-icon {
+        margin-right: 10px;
+        font-size: 20px;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  // Position adjustments
+  &.place-top-left,
+  &.place-top-right,
+  &.place-top-center {
+    top: 20px;
+  }
+
+  &.place-bottom-left,
+  &.place-bottom-right,
+  &.place-bottom-center {
+    bottom: 20px;
   }
 }
