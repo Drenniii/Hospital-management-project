@@ -111,14 +111,6 @@ const Chat = () => {
     }
   }, [activeChatRoom]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const loadAvailableUsers = async () => {
     try {
       let users = [];
