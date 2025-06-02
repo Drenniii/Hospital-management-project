@@ -37,7 +37,7 @@ const commonRoutes = [
   {
     path: "/chat",
     name: "Messages",
-    icon: "nc-icon nc-chat-33",
+    icon: "nc-icon nc-chat-round",
     component: Chat,
     layout: "/admin",
   },
