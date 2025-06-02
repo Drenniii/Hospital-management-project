@@ -403,4 +403,17 @@ export default class ApiService {
       throw error;
     }
   }
+
+  static async clearChatMessages(chatRoomId) {
+    try {
+      const response = await axios.delete(
+        `${this.BASE_URL}/api/v1/chat/messages/${chatRoomId}/clear`,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error clearing messages:', error);
+      throw error;
+    }
+  }
 }

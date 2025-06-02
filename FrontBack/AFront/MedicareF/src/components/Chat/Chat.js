@@ -188,6 +188,14 @@ const Chat = () => {
       await ApiService.sendMessage(messageData);
       setNewMessage('');
       await loadMessages(activeChatRoom.id);
+      
+      // Use setTimeout to ensure the message is rendered before scrolling
+      setTimeout(() => {
+        const messagesArea = document.querySelector('.messages-area');
+        if (messagesArea) {
+          messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+      }, 100);
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -198,6 +206,18 @@ const Chat = () => {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+  };
+
+  const handleClearMessages = async () => {
+    if (!activeChatRoom) return;
+    
+    try {
+      await ApiService.clearChatMessages(activeChatRoom.id);
+      await loadMessages(activeChatRoom.id);
+    } catch (error) {
+      console.error('Error clearing messages:', error);
+      alert('Failed to clear messages. Please try again.');
+    }
   };
 
   if (loading) {
@@ -251,11 +271,24 @@ const Chat = () => {
             {activeChatRoom ? (
               <>
                 <div className="chat-header">
-                  <h5>
-                    {userRole === 'USER'
-                      ? `${activeChatRoom.professional.firstname} ${activeChatRoom.professional.lastname}`
-                      : `${activeChatRoom.user.firstname} ${activeChatRoom.user.lastname}`}
-                  </h5>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5>
+                      {userRole === 'USER'
+                        ? `${activeChatRoom.professional.firstname} ${activeChatRoom.professional.lastname}`
+                        : `${activeChatRoom.user.firstname} ${activeChatRoom.user.lastname}`}
+                    </h5>
+                    <Button 
+                      variant="outline-danger" 
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to clear all messages? This cannot be undone.')) {
+                          handleClearMessages();
+                        }
+                      }}
+                    >
+                      Clear Messages
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="messages-area">
