@@ -154,7 +154,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                     {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
                       <>
                         <Button
-                          variant="info"
+                          variant="primary"
                           size="sm"
                           className="me-2"
                           onClick={() => openViewPanel(appointment)}
@@ -186,9 +186,9 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                         )}
                         {appointment.type === "THERAPY" && (
                           <Button
-                            variant="info"
+                            variant="primary"
                             size="sm"
-                            className="me-2"
+                            className="me-2 mr-2"
                             onClick={() => setShowPsychology(true)}
                           >
                             <i className="nc-icon nc-sound-wave mr-1"></i>

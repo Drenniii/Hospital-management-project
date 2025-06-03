@@ -22,7 +22,7 @@ export default function LandingPage() {
           backgroundImage: 'url("https://hellocare.ai/hubfs/implement.png")', // ndrysho linkun e imazhit sipas vendndodhjes tënde
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          height: '545px',
+          height: '100vh',
           width: '100vw',
           display: 'flex',
           justifyContent: 'center',

@@ -558,6 +558,7 @@ function TherapistSelection() {
                   <div className="mt-auto d-grid gap-2">
                     <Button 
                       variant="outline-primary"
+                      className="mr-3"
                       onClick={() => handleBooking(therapist)}
                     >
                       Book Session
