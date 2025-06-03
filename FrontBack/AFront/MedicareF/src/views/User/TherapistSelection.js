@@ -267,7 +267,7 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
                   size="sm"
                   role="status"
                   aria-hidden="true"
-                  className="me-2"
+                  className="me-2 "
                 />
                 Booking...
               </>
@@ -389,9 +389,9 @@ function TherapistProfileModal({ show, onClose, therapist }) {
 
         <div className="text-center mt-4">
           <Button 
-            variant="primary" 
+            variant="primary " 
             onClick={onClose}
-            className="px-4 py-2"
+            className="px-4 py-2 "
             style={{
               borderRadius: '50px',
               fontSize: '1.1rem',

@@ -154,7 +154,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                     {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
                       <>
                         <Button
-                          variant="primary"
+                          variant="primary "
                           size="sm"
                           className="me-2"
                           onClick={() => openViewPanel(appointment)}
