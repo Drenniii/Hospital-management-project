@@ -417,44 +417,94 @@ export default class ApiService {
     }
   }
 
-  // === Credits and Payments API ===
-  static async getUserCredits(userId) {
+  // === Appointments History ===
+  static async saveAppointmentHistory(appointmentId, historyText) {
     try {
-      const response = await axios.get(
-        `${this.BASE_URL}/api/users/${userId}/credits`,
-        { headers: this.getHeaders() }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching user credits:', error);
-      throw error;
-    }
-  }
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
 
-  // === Payments ===
-  static async getAllPayments() {
-    const response = await axios.get(`${this.BASE_URL}/api/payments`, {
-      headers: this.getHeaders()
-    });
-    return response.data;
-  }
-
-  static async processPayment(paymentData) {
-    try {
+      console.log('Saving appointment history with token:', token.substring(0, 20) + '...');
+      
       const response = await axios.post(
-        `${this.BASE_URL}/api/payments/process`,
-        paymentData,
+        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/history`,
+        { historyText },
         {
-          headers: this.getHeaders(),
-          withCredentials: true 
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
       return response.data;
     } catch (error) {
-      console.error('Error processing payment:', error);
+      console.error('Error saving appointment history:', {
+        status: error.response?.status,
+        message: error.response?.data?.message || error.message,
+        error: error
+      });
       throw error;
     }
   }
 
+  static async getAppointmentHistories(appointmentId) {
+    try {
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
+
+      console.log('Getting appointment histories with token:', token.substring(0, 20) + '...');
+      
+      const response = await axios.get(
+        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/history`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 403) {
+        console.error('Authorization error fetching histories. Token:', this.getAccessToken()?.substring(0, 20) + '...');
+      }
+      console.error('Error fetching appointment histories:', {
+        status: error.response?.status,
+        message: error.response?.data?.message || error.message,
+        error: error
+      });
+      throw error;
+    }
+  }
+
+  static async updateAppointmentHistory(historyId, historyText) {
+    try {
+      const token = this.getAccessToken();
+      if (!token) throw new Error('No authentication token found');
+
+      console.log('Updating appointment history with token:', token.substring(0, 20) + '...');
+      
+      const response = await axios.put(
+        `${this.BASE_URL}/api/v1/appointments/history/${historyId}`,
+        { historyText },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 403) {
+        console.error('Authorization error updating history. Token:', this.getAccessToken()?.substring(0, 20) + '...');
+      }
+      console.error('Error updating appointment history:', {
+        status: error.response?.status,
+        message: error.response?.data?.message || error.message,
+        error: error
+      });
+      throw error;
+    }
+  }
 }
-//api
+//api.
