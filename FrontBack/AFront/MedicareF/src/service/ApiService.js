@@ -506,5 +506,49 @@ export default class ApiService {
       throw error;
     }
   }
+
+// POST /api/payments
+static async processPayment(paymentRequest) {
+  try {
+    const response = await axios.post(
+      `${this.BASE_URL}/api/payments`,
+      paymentRequest,
+      { headers: this.getHeaders() }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error processing payment:", error.response || error);
+    throw error;
+  }
+}
+
+// GET /api/payments
+static async getAllPayments() {
+  try {
+    const response = await axios.get(`${this.BASE_URL}/api/payments`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching payments:", error.response || error);
+    throw error;
+  }
+}
+
+// GET /api/payments/credits/{userId}
+static async getUserCredits(userId) {
+  try {
+    const response = await axios.get(
+      `${this.BASE_URL}/api/payments/credits/${userId}`,
+      { headers: this.getHeaders() }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user credits:", error.response || error);
+    throw error;
+  }
+}
+
+
 }
 //api.
