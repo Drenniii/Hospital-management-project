@@ -142,6 +142,22 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
   const [notes, setNotes] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userCredits, setUserCredits] = useState(0);
+
+  useEffect(() => {
+    if (show) {
+      loadUserCredits();
+    }
+  }, [show]);
+
+  const loadUserCredits = async () => {
+    try {
+      const userData = await ApiService.getCurrentUser();
+      setUserCredits(userData.credits);
+    } catch (err) {
+      console.error("Error loading user credits:", err);
+    }
+  };
 
   // Filter available times (9 AM to 5 PM, hourly slots)
   const availableTimes = Array.from({ length: 9 }, (_, i) => {
@@ -155,19 +171,21 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
       return;
     }
 
+    if (userCredits < 50) {
+      setBookingError("You need $50 to book this session. Please add more funds to your account.");
+      return;
+    }
+
     try {
       setLoading(true);
       const [year, month, day] = selectedDate.split('-');
       const [hours] = selectedTime.split(':');
       const dateTime = new Date(year, month - 1, day, parseInt(hours), 0, 0, 0);
       
-      // Format date for backend
       const formattedDate = dateTime.toISOString().replace('Z', '');
 
-      // Get current user
       const currentUser = await ApiService.getCurrentUser();
 
-      // Create appointment
       await ApiService.createAppointment(
         currentUser.id,
         therapist.id,
@@ -176,7 +194,7 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
         notes
       );
 
-      alert('Appointment booked successfully!');
+      alert('Appointment booked successfully! $50 has been deducted from your account.');
       onClose();
       onConfirm();
     } catch (error) {
@@ -203,8 +221,12 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
         <h4 className="mb-4">Book Physical Therapy Session</h4>
         
         {therapist && (
-          <div className="mb-3">
+          <div className="mb-4">
             <h6>Booking with: {therapist.firstname} {therapist.lastname}</h6>
+            <div className="alert alert-info">
+              <p className="mb-1"><strong>Session Cost:</strong> $50</p>
+              <p className="mb-0"><strong>Your Balance:</strong> ${userCredits}</p>
+            </div>
           </div>
         )}
         
@@ -258,7 +280,11 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleConfirm} disabled={loading}>
+          <Button 
+            variant="primary" 
+            onClick={handleConfirm} 
+            disabled={loading || userCredits < 50}
+          >
             {loading ? (
               <>
                 <Spinner
@@ -267,12 +293,14 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
                   size="sm"
                   role="status"
                   aria-hidden="true"
-                  className="me-2 "
+                  className="me-2"
                 />
                 Booking...
               </>
+            ) : userCredits < 50 ? (
+              'Insufficient Funds'
             ) : (
-              'Confirm Booking'
+              'Book Session'
             )}
           </Button>
         </div>
@@ -414,15 +442,16 @@ function TherapistSelection() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedTherapist, setSelectedTherapist] = useState(null);
+  const [userCredits, setUserCredits] = useState(0);
 
   useEffect(() => {
-    // Check if user is logged in
     const token = ApiService.getAccessToken();
     if (!token) {
       history.push("/login");
       return;
     }
     loadTherapists();
+    loadUserCredits();
   }, [history]);
 
   const loadTherapists = async () => {
@@ -444,6 +473,15 @@ function TherapistSelection() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUserCredits = async () => {
+    try {
+      const userData = await ApiService.getCurrentUser();
+      setUserCredits(userData.credits);
+    } catch (err) {
+      console.error("Error loading user credits:", err);
     }
   };
 
@@ -512,6 +550,14 @@ function TherapistSelection() {
         <Col md="12">
           <h4>Select a Physical Therapist</h4>
           <p>Choose from our experienced physical therapy professionals</p>
+          <div className="alert alert-info">
+            <p className="mb-0">
+              <strong>Your Balance:</strong> ${userCredits} 
+              <span className="ms-2">
+                (Each session costs $50)
+              </span>
+            </p>
+          </div>
         </Col>
       </Row>
       <Row>
@@ -554,14 +600,22 @@ function TherapistSelection() {
                     {therapist.address && (
                       <><strong>Address:</strong> {therapist.address}<br/></>
                     )}
+                    <div className="mt-2">
+                      <strong>Session Cost:</strong> $50
+                    </div>
                   </Card.Text>
-                  <div className="mt-auto d-grid gap-2">
+                  <div className="mt-auto d-flex gap-2">
                     <Button 
-                      variant="outline-primary"
-                      className="mr-3"
+                      variant={userCredits >= 50 ? "outline-primary" : "outline-secondary"}
+                      className="flex-grow-1"
                       onClick={() => handleBooking(therapist)}
+                      disabled={userCredits < 50}
                     >
-                      Book Session
+                      {userCredits >= 50 ? (
+                        "Book Session"
+                      ) : (
+                        "Insufficient Funds"
+                      )}
                     </Button>
                     <Button 
                       variant="outline-secondary"

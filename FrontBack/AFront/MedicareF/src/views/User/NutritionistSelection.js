@@ -36,7 +36,7 @@ const defaultProfileStyle = {
   justifyContent: 'center',
   backgroundColor: '#f8f9fa',
   fontSize: '80px',
-  color: '#198754', // Bootstrap success color for nutritionists
+  color: '#0d6efd',
   borderRadius: '4px 4px 0 0'
 };
 
@@ -59,7 +59,7 @@ const imageContainerStyle = {
   margin: "0 auto 2rem",
   borderRadius: "50%",
   boxShadow: "0 4px 15px rgba(0,0,0,.1)",
-  border: "3px solid #198754",
+  border: "3px solid #0d6efd",
   overflow: "hidden",
   transition: "transform 0.3s ease",
 };
@@ -87,10 +87,10 @@ styleSheet.textContent = `
   }
 
   .profile-details h6 {
-    color: #198754;
+    color: #0d6efd;
     font-size: 1.1rem;
     margin-bottom: 1rem;
-    border-bottom: 2px solid #19875422;
+    border-bottom: 2px solid #0d6efd22;
     padding-bottom: 0.5rem;
   }
 
@@ -113,7 +113,7 @@ styleSheet.textContent = `
   }
 
   .close-button:hover {
-    color: #198754;
+    color: #0d6efd;
   }
 
   .modal-content-scroll::-webkit-scrollbar {
@@ -126,22 +126,38 @@ styleSheet.textContent = `
   }
 
   .modal-content-scroll::-webkit-scrollbar-thumb {
-    background: #19875455;
+    background: #0d6efd55;
     border-radius: 4px;
   }
 
   .modal-content-scroll::-webkit-scrollbar-thumb:hover {
-    background: #198754;
+    background: #0d6efd;
   }
 `;
 document.head.appendChild(styleSheet);
 
-function BookingModal({ show, onClose, nutricist, onConfirm }) {
+function BookingModal({ show, onClose, nutritionist, onConfirm }) {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [notes, setNotes] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userCredits, setUserCredits] = useState(0);
+
+  useEffect(() => {
+    if (show) {
+      loadUserCredits();
+    }
+  }, [show]);
+
+  const loadUserCredits = async () => {
+    try {
+      const userData = await ApiService.getCurrentUser();
+      setUserCredits(userData.credits);
+    } catch (err) {
+      console.error("Error loading user credits:", err);
+    }
+  };
 
   // Filter available times (9 AM to 5 PM, hourly slots)
   const availableTimes = Array.from({ length: 9 }, (_, i) => {
@@ -155,28 +171,30 @@ function BookingModal({ show, onClose, nutricist, onConfirm }) {
       return;
     }
 
+    if (userCredits < 50) {
+      setBookingError("You need $50 to book this session. Please add more funds to your account.");
+      return;
+    }
+
     try {
       setLoading(true);
       const [year, month, day] = selectedDate.split('-');
       const [hours] = selectedTime.split(':');
       const dateTime = new Date(year, month - 1, day, parseInt(hours), 0, 0, 0);
       
-      // Format date for backend
       const formattedDate = dateTime.toISOString().replace('Z', '');
 
-      // Get current user
       const currentUser = await ApiService.getCurrentUser();
 
-      // Create appointment
       await ApiService.createAppointment(
         currentUser.id,
-        nutricist.id,
+        nutritionist.id,
         formattedDate,
         'NUTRITION',
         notes
       );
 
-      alert('Appointment booked successfully!');
+      alert('Appointment booked successfully! $50 has been deducted from your account.');
       onClose();
       onConfirm();
     } catch (error) {
@@ -200,11 +218,15 @@ function BookingModal({ show, onClose, nutricist, onConfirm }) {
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-        <h4 className="mb-4">Book Nutrition Consultation</h4>
+        <h4 className="mb-4">Book Nutrition Session</h4>
         
-        {nutricist && (
-          <div className="mb-3">
-            <h6>Booking with: {nutricist.firstname} {nutricist.lastname}</h6>
+        {nutritionist && (
+          <div className="mb-4">
+            <h6>Booking with: {nutritionist.firstname} {nutritionist.lastname}</h6>
+            <div className="alert alert-info">
+              <p className="mb-1"><strong>Session Cost:</strong> $50</p>
+              <p className="mb-0"><strong>Your Balance:</strong> ${userCredits}</p>
+            </div>
           </div>
         )}
         
@@ -242,7 +264,7 @@ function BookingModal({ show, onClose, nutricist, onConfirm }) {
             <Form.Control
               as="textarea"
               rows={3}
-              placeholder="Add any dietary restrictions, preferences, or other notes..."
+              placeholder="Add any special notes or dietary requirements for your session..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={loading}
@@ -258,7 +280,11 @@ function BookingModal({ show, onClose, nutricist, onConfirm }) {
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="success" onClick={handleConfirm} disabled={loading}>
+          <Button 
+            variant="primary" 
+            onClick={handleConfirm} 
+            disabled={loading || userCredits < 50}
+          >
             {loading ? (
               <>
                 <Spinner
@@ -271,8 +297,10 @@ function BookingModal({ show, onClose, nutricist, onConfirm }) {
                 />
                 Booking...
               </>
+            ) : userCredits < 50 ? (
+              'Insufficient Funds'
             ) : (
-              'Confirm Booking'
+              'Book Session'
             )}
           </Button>
         </div>
@@ -314,15 +342,15 @@ function NutritionistProfileModal({ show, onClose, nutritionist }) {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '60px',
-              color: '#198754'
+              color: '#0d6efd'
             }}>
-              <i className="fas fa-user-nurse"></i>
+              <i className="fas fa-user-md"></i>
             </div>
           )}
         </div>
 
         <div className="profile-details">
-          <h3 className="text-center mb-4" style={{ color: '#198754' }}>
+          <h3 className="text-center mb-4" style={{ color: '#0d6efd' }}>
             {nutritionist.firstname} {nutritionist.lastname}
           </h3>
           
@@ -389,7 +417,7 @@ function NutritionistProfileModal({ show, onClose, nutritionist }) {
 
         <div className="text-center mt-4">
           <Button 
-            variant="success" 
+            variant="primary" 
             onClick={onClose}
             className="px-4 py-2"
             style={{
@@ -413,24 +441,23 @@ function NutritionistSelection() {
   const [error, setError] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [selectedNutricist, setSelectedNutricist] = useState(null);
+  const [selectedNutritionist, setSelectedNutritionist] = useState(null);
+  const [userCredits, setUserCredits] = useState(0);
 
   useEffect(() => {
-    // Check if user is logged in
     const token = ApiService.getAccessToken();
     if (!token) {
       history.push("/login");
       return;
     }
     loadNutritionists();
+    loadUserCredits();
   }, [history]);
 
   const loadNutritionists = async () => {
     try {
       setLoading(true);
       const response = await ApiService.getAllNutritionists();
-      console.log('Nutritionists response:', response);
-      
       setNutritionists(response || []);
       setError(null);
     } catch (err) {
@@ -447,6 +474,15 @@ function NutritionistSelection() {
     }
   };
 
+  const loadUserCredits = async () => {
+    try {
+      const userData = await ApiService.getCurrentUser();
+      setUserCredits(userData.credits);
+    } catch (err) {
+      console.error("Error loading user credits:", err);
+    }
+  };
+
   const handleError = () => {
     if (error.includes("Access denied") || error.includes("Session expired")) {
       localStorage.clear();
@@ -456,31 +492,30 @@ function NutritionistSelection() {
     }
   };
 
-  const handleBooking = (nutricist) => {
-    setSelectedNutricist(nutricist);
+  const handleBooking = (nutritionist) => {
+    setSelectedNutritionist(nutritionist);
     setShowBookingModal(true);
   };
 
   const handleConfirmBooking = async () => {
-    // Reload nutritionists to refresh any availability changes
     await loadNutritionists();
+    await loadUserCredits();
   };
 
   const handleViewProfile = (nutritionist) => {
-    // Check if user is logged in
     const token = ApiService.getAccessToken();
     if (!token) {
       history.push("/login");
       return;
     }
-    setSelectedNutricist(nutritionist);
+    setSelectedNutritionist(nutritionist);
     setShowProfileModal(true);
   };
 
   if (loading) {
     return (
       <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
-        <Spinner animation="border" role="status" variant="success">
+        <Spinner animation="border" role="status" variant="primary">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       </Container>
@@ -493,7 +528,7 @@ function NutritionistSelection() {
         <div className="alert alert-danger" role="alert">
           <p>{error}</p>
           <Button 
-            variant="outline-success" 
+            variant="outline-primary" 
             className="mt-2"
             onClick={handleError}
           >
@@ -511,7 +546,15 @@ function NutritionistSelection() {
       <Row className="mb-4">
         <Col md="12">
           <h4>Select a Nutritionist</h4>
-          <p>Choose from our certified nutrition experts</p>
+          <p>Choose from our experienced nutrition professionals</p>
+          <div className="alert alert-info">
+            <p className="mb-0">
+              <strong>Your Balance:</strong> ${userCredits} 
+              <span className="ms-2">
+                (Each session costs $50)
+              </span>
+            </p>
+          </div>
         </Col>
       </Row>
       <Row>
@@ -540,7 +583,7 @@ function NutritionistSelection() {
                   style={defaultProfileStyle}
                   className={nutritionist.image ? 'd-none' : ''}
                 >
-                  <i className="fas fa-user-nurse"></i>
+                  <i className="fas fa-user-md"></i>
                 </div>
                 <Card.Body className="d-flex flex-column">
                   <Card.Title className="d-flex justify-content-between align-items-center">
@@ -554,13 +597,22 @@ function NutritionistSelection() {
                     {nutritionist.address && (
                       <><strong>Address:</strong> {nutritionist.address}<br/></>
                     )}
+                    <div className="mt-2">
+                      <strong>Session Cost:</strong> $50
+                    </div>
                   </Card.Text>
-                  <div className="mt-auto d-grid gap-2">
+                  <div className="mt-auto d-flex gap-2">
                     <Button 
-                      variant="outline-success"
+                      variant={userCredits >= 50 ? "outline-primary" : "outline-secondary"}
+                      className="flex-grow-1"
                       onClick={() => handleBooking(nutritionist)}
+                      disabled={userCredits < 50}
                     >
-                      Book Consultation
+                      {userCredits >= 50 ? (
+                        "Book Session"
+                      ) : (
+                        "Insufficient Funds"
+                      )}
                     </Button>
                     <Button 
                       variant="outline-secondary"
@@ -579,14 +631,14 @@ function NutritionistSelection() {
       <BookingModal
         show={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        nutricist={selectedNutricist}
+        nutritionist={selectedNutritionist}
         onConfirm={handleConfirmBooking}
       />
 
       <NutritionistProfileModal
         show={showProfileModal}
         onClose={() => setShowProfileModal(false)}
-        nutritionist={selectedNutricist}
+        nutritionist={selectedNutritionist}
       />
     </Container>
   );

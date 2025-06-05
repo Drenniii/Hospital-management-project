@@ -416,5 +416,45 @@ export default class ApiService {
       throw error;
     }
   }
+
+  // === Credits and Payments API ===
+  static async getUserCredits(userId) {
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/api/users/${userId}/credits`,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user credits:', error);
+      throw error;
+    }
+  }
+
+  // === Payments ===
+  static async getAllPayments() {
+    const response = await axios.get(`${this.BASE_URL}/api/payments`, {
+      headers: this.getHeaders()
+    });
+    return response.data;
+  }
+
+  static async processPayment(paymentData) {
+    try {
+      const response = await axios.post(
+        `${this.BASE_URL}/api/payments/process`,
+        paymentData,
+        {
+          headers: this.getHeaders(),
+          withCredentials: true 
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      throw error;
+    }
+  }
+
 }
 //api

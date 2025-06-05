@@ -154,7 +154,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                     {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
                       <>
                         <Button
-                          variant="primary "
+                          variant="primary"
                           size="sm"
                           className="me-2"
                           onClick={() => openViewPanel(appointment)}
@@ -188,7 +188,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                           <Button
                             variant="primary"
                             size="sm"
-                            className="me-2 mr-2"
+                            className="me-2"
                             onClick={() => setShowPsychology(true)}
                           >
                             <i className="nc-icon nc-sound-wave mr-1"></i>
@@ -286,15 +286,12 @@ function Appointments() {
   const history = useHistory();
 
   useEffect(() => {
-    console.log("Appointments component mounted");
     const token = ApiService.getAccessToken();
     if (!token) {
-      console.log("No authentication token found, redirecting to login");
       history.push("/login");
       return;
     }
 
-    console.log("Component mounted. User role:", userRole);
     loadAppointments();
   }, [history]);
 
@@ -304,34 +301,23 @@ function Appointments() {
       setError(null);
       let response;
       
-      console.log("Fetching appointments for role:", userRole);
-      
       if (!userRole) {
         throw new Error("User role not found");
       }
       
       if (userRole === "USER") {
-        console.log("Calling getClientAppointments");
         response = await ApiService.getClientAppointments();
       } else if (userRole === "THERAPIST" || userRole === "NUTRICIST") {
-        console.log("Calling getProfessionalAppointments");
         response = await ApiService.getProfessionalAppointments();
       } else {
         throw new Error(`Invalid user role: ${userRole}`);
       }
 
-      console.log("Appointments response:", response);
       setAppointments(response || []);
     } catch (err) {
       console.error("Error loading appointments:", err);
-      console.error("Error details:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
 
       if (err.response?.status === 401 || err.response?.status === 403) {
-        console.log("Authentication error, redirecting to login");
         history.push("/login");
         return;
       }
@@ -344,26 +330,15 @@ function Appointments() {
 
   const handleStatusUpdate = async (appointmentId, newStatus) => {
     try {
-      console.log('Updating appointment status:', { appointmentId, newStatus });
       await ApiService.updateAppointmentStatus(appointmentId, newStatus);
-      console.log('Status update successful');
       await loadAppointments();
     } catch (err) {
       console.error("Error updating appointment status:", err);
-      console.error("Error details:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
       alert("Failed to update appointment status. Please try again.");
     }
   };
 
   const handleDelete = async (appointmentId) => {
-    if (!window.confirm("Are you sure you want to cancel this appointment?")) {
-      return;
-    }
-
     try {
       await ApiService.deleteAppointment(appointmentId);
       await loadAppointments();
@@ -372,14 +347,6 @@ function Appointments() {
       alert("Failed to cancel appointment. Please try again.");
     }
   };
-
-  const activeAppointments = appointments.filter(
-    app => app.status === "SCHEDULED"
-  );
-
-  const completedAppointments = appointments.filter(
-    app => app.status === "COMPLETED"
-  );
 
   if (loading) {
     return (
@@ -394,7 +361,7 @@ function Appointments() {
   if (error) {
     return (
       <Container>
-        <div className="alert alert-danger" role="alert">
+        <Alert variant="danger">
           <p>{error}</p>
           <Button 
             variant="outline-primary" 
@@ -403,29 +370,34 @@ function Appointments() {
           >
             Try Again
           </Button>
-        </div>
+        </Alert>
       </Container>
     );
   }
+
+  const activeAppointments = appointments.filter(
+    app => app.status === "SCHEDULED"
+  );
+
+  const completedAppointments = appointments.filter(
+    app => app.status === "COMPLETED"
+  );
 
   return (
     <Container fluid>
       <Row>
         <Col md="12">
           <Card>
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <div>
-                <Card.Title as="h4">My Appointments</Card.Title>
-                <p className="card-category">
-                  {userRole === "USER" 
-                    ? "Your scheduled appointments with professionals"
-                    : "Your scheduled appointments with clients"}
-                </p>
-              </div>
+            <Card.Header>
+              <Card.Title as="h4">My Appointments</Card.Title>
+              <p className="card-category">
+                {userRole === "USER" 
+                  ? "Your scheduled appointments with professionals"
+                  : "Your scheduled appointments with clients"}
+              </p>
             </Card.Header>
             <Card.Body>
               {userRole === "USER" ? (
-                // For regular users, only show active appointments
                 activeAppointments.length === 0 ? (
                   <div className="text-center p-3">
                     <p className="mb-0">No active appointments found.</p>
@@ -439,7 +411,6 @@ function Appointments() {
                   />
                 )
               ) : (
-                // For professionals (therapists and nutritionists), show tabs
                 <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
                   <Nav variant="tabs" className="mb-3">
                     <Nav.Item>

@@ -13,6 +13,8 @@ import NutritionistSelection from "views/User/NutritionistSelection.js";
 import Appointments from "views/Appointments.js";
 import Settings from "views/Settings.js";
 import Chat from "components/Chat/Chat.js";
+import Account from "views/Account.js";
+import Payments from "views/Admin/Payments.js";
 
 // ==========================================
 // Merr rolin e përdoruesit nga localStorage
@@ -35,10 +37,10 @@ const commonRoutes = [
     layout: "/admin",
   },
   {
-    path: "/chat",
-    name: "Messages",
-    icon: "nc-icon nc-chat-round",
-    component: Chat,
+    path: "/account",
+    name: "Account",
+    icon: "nc-icon nc-credit-card",
+    component: Account,
     layout: "/admin",
   },
   {
@@ -46,6 +48,19 @@ const commonRoutes = [
     name: "Notifications",
     icon: "nc-icon nc-bell-55",
     component: Notifications,
+    layout: "/admin",
+  },
+];
+
+// ======================================
+// Chat route for non-admin users
+// ======================================
+const chatRoute = [
+  {
+    path: "/chat",
+    name: "Messages",
+    icon: "nc-icon nc-chat-round",
+    component: Chat,
     layout: "/admin",
   },
 ];
@@ -127,6 +142,13 @@ const userRoutes = [
 // ====================
 const adminRoutes = [
   {
+    path: "/adminDashboard",
+    name: "Admin Dashboard",
+    icon: "nc-icon nc-grid-45",
+    component: AdminDashboard,
+    layout: "/admin",
+  },
+  {
     path: "/dashboard",
     name: "Dashboard",
     icon: "nc-icon nc-chart-pie-35",
@@ -134,10 +156,10 @@ const adminRoutes = [
     layout: "/admin",
   },
   {
-    path: "/adminDashboard",
-    name: "Admin Dashboard",
-    icon: "nc-icon nc-settings-gear-65",
-    component: AdminDashboard,
+    path: "/payments",
+    name: "Payments",
+    icon: "nc-icon nc-money-coins",
+    component: Payments,
     layout: "/admin",
   },
 ];
@@ -165,16 +187,16 @@ const getRoutesByRole = () => {
   let routes;
   switch (role) {
     case "THERAPIST":
-      routes = [...commonRoutes, ...appointmentRoutes, ...therapistRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...therapistRoutes, ...hiddenRoutes];
       break;
     case "USER":
-      routes = [...commonRoutes, ...appointmentRoutes, ...userRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...userRoutes, ...hiddenRoutes];
       break;
     case "ADMIN":
       routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
       break;
     case "NUTRICIST":
-      routes = [...commonRoutes, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
       break;
     default:
       routes = [...commonRoutes, ...hiddenRoutes];

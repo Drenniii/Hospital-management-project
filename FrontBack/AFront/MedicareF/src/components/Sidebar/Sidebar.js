@@ -95,19 +95,6 @@ function Sidebar({ color, image, routes }) {
                 );
               }
             })}
-
-          {role === "ADMIN" && (
-            <li className={activeRoute("/admin/adminDashboard")}>
-              <NavLink
-                to="/admin/adminDashboard"
-                className="nav-link"
-                activeClassName="active"
-              >
-                <i className="nc-icon nc-settings-gear-65" />
-                <p>Admin Dashboard</p>
-              </NavLink>
-            </li>
-          )}
         </Nav>
       </div>
     </div>
