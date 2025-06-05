@@ -426,7 +426,7 @@ export default class ApiService {
       console.log('Saving appointment history with token:', token.substring(0, 20) + '...');
       
       const response = await axios.post(
-        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/history`,
+        `${this.BASE_URL}/api/appointments/${appointmentId}/history`,
         { historyText },
         {
           headers: {
@@ -454,7 +454,7 @@ export default class ApiService {
       console.log('Getting appointment histories with token:', token.substring(0, 20) + '...');
       
       const response = await axios.get(
-        `${this.BASE_URL}/api/v1/appointments/${appointmentId}/history`,
+        `${this.BASE_URL}/api/appointments/${appointmentId}/history`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -484,7 +484,7 @@ export default class ApiService {
       console.log('Updating appointment history with token:', token.substring(0, 20) + '...');
       
       const response = await axios.put(
-        `${this.BASE_URL}/api/v1/appointments/history/${historyId}`,
+        `${this.BASE_URL}/api/appointments/history/${historyId}`,
         { historyText },
         {
           headers: {
