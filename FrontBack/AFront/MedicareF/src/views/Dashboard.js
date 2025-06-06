@@ -316,8 +316,8 @@ const handleCreateTask = () => {
           <Col md="6">
             <Card>
               <Card.Header>
-                <Card.Title as="h4">2017 Sales</Card.Title>
-                <p className="card-category">All products including Taxes</p>
+                <Card.Title as="h4">2024 Sales</Card.Title>
+                <p className="card-category">Medicare+</p>
               </Card.Header>
               <Card.Body>
                 <div className="ct-chart" id="chartActivity">
@@ -395,8 +395,8 @@ const handleCreateTask = () => {
               <Card.Footer>
                 <div className="legend">
                   <i className="fas fa-circle text-info"></i>
-                  Tesla Model S <i className="fas fa-circle text-danger"></i>
-                  BMW 5 Series
+                  Terapist <i className="fas fa-circle text-danger"></i>
+                  Nutricist
                 </div>
                 <hr></hr>
                 <div className="stats">
@@ -467,7 +467,7 @@ const handleCreateTask = () => {
           }
         >
           <Button
-            className="btn-simple btn-link p-1"
+            className="btn-simple btn-link p-1 mr-2"
             type="button"
             variant="info"
             onClick={() => {
