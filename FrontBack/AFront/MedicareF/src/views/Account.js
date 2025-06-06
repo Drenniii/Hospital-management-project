@@ -55,7 +55,7 @@ function AddCreditsPanel({ show, onClose, onNext }) {
           />
         </Form.Group>
         <div className="d-flex justify-content-end gap-2">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button className="mr-2" variant="secondary" onClick={onClose}>Cancel</Button>
           <Button variant="primary" onClick={() => onNext(creditsToAdd)}>Next</Button>
         </div>
       </div>
@@ -135,7 +135,7 @@ function PaymentPanel({ show, onClose, amount, onSubmit }) {
             </Col>
           </Row>
           <div className="d-flex justify-content-end gap-2">
-            <Button variant="secondary" onClick={onClose}>Cancel</Button>
+            <Button className="mr-2" variant="secondary" onClick={onClose}>Cancel</Button>
             <Button variant="primary" type="submit" disabled={loading}>
               {loading ? "Processing..." : `Pay $${amount}`}
             </Button>

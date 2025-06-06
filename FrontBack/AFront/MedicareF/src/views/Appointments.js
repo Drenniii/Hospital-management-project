@@ -230,7 +230,7 @@ function AddHistoryModal({ show, onHide, appointmentId, appointment, appointment
         
         {/* Appointment Selector Dropdown */}
         <div className="mb-3">
-          <label className="form-label">Select Appointment</label>
+          <label className="form-label">Select Appointment:</label>
           <select 
             className="form-select"
             value={selectedAppointment?.id || ''}
@@ -336,11 +336,11 @@ function AddHistoryModal({ show, onHide, appointmentId, appointment, appointment
 
         {/* Buttons */}
         <div className="d-flex justify-content-end gap-2">
-          <Button variant="secondary" onClick={onHide}>
+          <Button className="mr-2" variant="secondary" onClick={onHide}>
             Close
           </Button>
           <Button 
-            variant="primary" 
+            variant="primary bg-primary" 
             onClick={handleSubmit}
             disabled={isSubmitting || !historyText.trim()}
           >
@@ -533,7 +533,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                       <Button
                         variant="info"
                         size="sm"
-                        className="me-2"
+                        className="me-2 mr-3"
                         onClick={() => openViewPanel(appointment)}
                       >
                         View Details
@@ -541,7 +541,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                       <Button
                         variant="primary"
                         size="sm"
-                        className="me-2"
+                        className="me-2 mr-3"
                         onClick={() => openHistoryModal(appointment)}
                       >
                         History
