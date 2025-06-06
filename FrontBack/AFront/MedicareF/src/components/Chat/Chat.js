@@ -60,10 +60,10 @@ function NewChatPanel({ show, onClose, availableUsers, selectedUser, onUserSelec
           </Form.Group>
         </Form>
         <div className="d-flex justify-content-end gap-2">
-          <Button variant="secondary" onClick={onClose}>
+          <Button className="mr-2" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={onStartChat} disabled={!selectedUser}>
+          <Button variant="primary bg-primary" onClick={onStartChat} disabled={!selectedUser}>
             Start Chat
           </Button>
         </div>
