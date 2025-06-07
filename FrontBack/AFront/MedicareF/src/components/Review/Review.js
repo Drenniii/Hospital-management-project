@@ -6,7 +6,6 @@ import {
   Card,
   Spinner
 } from "react-bootstrap";
-import { Rating } from '@mui/material';
 import ApiService from "service/ApiService";
 
 // Modal styles
@@ -31,6 +30,24 @@ const modalContentStyle = {
   maxHeight: "80vh",
   overflowY: "auto",
   boxShadow: "0 5px 15px rgba(0,0,0,.5)",
+};
+
+// Custom Star Rating Component
+const StarRating = ({ value, onChange, disabled, readOnly }) => {
+  const stars = [1, 2, 3, 4, 5];
+  
+  return (
+    <div className="d-flex justify-content-center align-items-center py-2">
+      {stars.map((star) => (
+        <i
+          key={star}
+          className={`fas fa-star fa-2x mx-1 ${value >= star ? 'text-warning' : 'text-muted'}`}
+          style={{ cursor: (disabled || readOnly) ? 'default' : 'pointer' }}
+          onClick={() => !disabled && !readOnly && onChange(star)}
+        />
+      ))}
+    </div>
+  );
 };
 
 export function ReviewModal({ 
@@ -97,19 +114,14 @@ export function ReviewModal({
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Rating</Form.Label>
-            <div className="d-flex justify-content-center align-items-center py-2">
-              <Rating
-                name="rating"
-                value={rating}
-                onChange={(_, newValue) => {
-                  setRating(newValue);
-                  setError("");
-                }}
-                disabled={isSubmitting}
-                size="large"
-                precision={1}
-              />
-            </div>
+            <StarRating
+              value={rating}
+              onChange={(newValue) => {
+                setRating(newValue);
+                setError("");
+              }}
+              disabled={isSubmitting}
+            />
             {rating > 0 && (
               <div className="text-center text-muted mt-2">
                 {rating} {rating === 1 ? 'Star' : 'Stars'}

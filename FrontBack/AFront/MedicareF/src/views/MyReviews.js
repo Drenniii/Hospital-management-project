@@ -8,9 +8,24 @@ import {
   Spinner,
   Alert
 } from "react-bootstrap";
-import { Rating } from '@mui/material';
 import ApiService from "service/ApiService";
 import { ReviewModal } from "../components/Review/Review";
+
+// Custom Star Rating Component
+const StarRating = ({ value, readOnly }) => {
+  const stars = [1, 2, 3, 4, 5];
+  
+  return (
+    <div className="d-flex align-items-center">
+      {stars.map((star) => (
+        <i
+          key={star}
+          className={`fas fa-star mx-1 ${value >= star ? 'text-warning' : 'text-muted'}`}
+        />
+      ))}
+    </div>
+  );
+};
 
 function MyReviews() {
   const [reviews, setReviews] = useState([]);
@@ -142,7 +157,7 @@ function MyReviews() {
                                 Reviewed on: {formatDate(review.createdAt)}
                               </small>
                             </div>
-                            <Rating value={review.rating} readOnly />
+                            <StarRating value={review.rating} readOnly />
                           </div>
                           <Card.Text>{review.comment}</Card.Text>
                           <div className="d-flex justify-content-end mt-3">

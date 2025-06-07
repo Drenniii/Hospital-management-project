@@ -17,12 +17,11 @@ import {
   Toast,
   ToastContainer
 } from "react-bootstrap";
-import { Rating } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import StarIcon from '@mui/material/Icon';
+
 import ApiService from "service/ApiService";
 import DietPlans from "../components/DietPlans/DietPlans";
 import Psychology from "../components/Psychology/Psychology";
+
 
 // Custom Modal Styles
 const modalOverlayStyle = {
@@ -48,22 +47,6 @@ const modalContentStyle = {
   boxShadow: "0 5px 15px rgba(0,0,0,.5)",
 };
 
-// Custom Rating component styles
-const StyledRating = styled(Rating)(({ theme }) => ({
-  '& .MuiRating-iconEmpty': {
-    color: theme.palette.grey[300],
-  },
-  '& .MuiRating-iconFilled': {
-    color: '#ffd700',
-  },
-  '& .MuiRating-iconHover': {
-    color: '#ffb400',
-  },
-  '& .MuiRating-icon': {
-    fontSize: '2.5rem', // Make stars bigger
-  },
-}));
-
 // Helper function for status badge variants
 const getStatusBadgeVariant = (status) => {
   switch (status) {
@@ -80,8 +63,60 @@ const getStatusBadgeVariant = (status) => {
   }
 };
 
+// Custom Star Rating Component
+const StarRating = ({ value, onChange, disabled, readOnly }) => {
+  const stars = [1, 2, 3, 4, 5];
+  
+  return (
+    <div className="d-flex justify-content-center align-items-center py-2">
+      {stars.map((star) => (
+        <i
+          key={star}
+          className={`fas fa-star fa-2x mx-1 ${value >= star ? 'text-warning' : 'text-muted'}`}
+          style={{ cursor: (disabled || readOnly) ? 'default' : 'pointer' }}
+          onClick={() => !disabled && !readOnly && onChange(star)}
+        />
+      ))}
+    </div>
+  );
+};
+
+// View Details Panel Component
+function ViewDetailsPanel({ appointment, show, onClose }) {
+  if (!show) return null;
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <h4>Appointment Details</h4>
+        {appointment ? (
+          <>
+            <p><strong>Client:</strong> {appointment.client.firstname} {appointment.client.lastname}</p>
+            <p><strong>Date & Time:</strong> {new Date(appointment.appointmentDateTime).toLocaleString()}</p>
+            <p><strong>Type:</strong> {appointment.type}</p>
+            <p>
+              <strong>Status:</strong>{" "}
+              <Badge 
+                bg={getStatusBadgeVariant(appointment.status)}
+                text={appointment.status === "WARNING" ? "dark" : "white"}
+              >
+                {appointment.status}
+              </Badge>
+            </p>
+            <p><strong>Notes:</strong> {appointment.notes || "No notes provided"}</p>
+            <p><strong>Created At:</strong> {new Date(appointment.createdAt).toLocaleString()}</p>
+          </>
+        ) : (
+          <p>No appointment data to display.</p>
+        )}
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+      </div>
+    </div>
+  );
+}
+
 // Add History Modal Component
-function AddHistoryModal({ show, onHide, appointmentId, appointment, appointments }) {
+function AppointmentHistory({ show, onHide, appointmentId, appointment, appointments }) {
   const [historyText, setHistoryText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -367,39 +402,6 @@ function AddHistoryModal({ show, onHide, appointmentId, appointment, appointment
             {isSubmitting ? "Saving..." : "Save Note"}
           </Button>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function ViewDetailsPanel({ appointment, show, onClose }) {
-  if (!show) return null;
-
-  return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-        <h4>Appointment Details</h4>
-        {appointment ? (
-          <>
-            <p><strong>Client:</strong> {appointment.client.firstname} {appointment.client.lastname}</p>
-            <p><strong>Date & Time:</strong> {new Date(appointment.appointmentDateTime).toLocaleString()}</p>
-            <p><strong>Type:</strong> {appointment.type}</p>
-            <p>
-              <strong>Status:</strong>{" "}
-              <Badge 
-                bg={getStatusBadgeVariant(appointment.status)}
-                text={appointment.status === "WARNING" ? "dark" : "white"}
-              >
-                {appointment.status}
-              </Badge>
-            </p>
-            <p><strong>Notes:</strong> {appointment.notes || "No notes provided"}</p>
-            <p><strong>Created At:</strong> {new Date(appointment.createdAt).toLocaleString()}</p>
-          </>
-        ) : (
-          <p>No appointment data to display.</p>
-        )}
-        <Button variant="secondary" onClick={onClose}>Close</Button>
       </div>
     </div>
   );
@@ -712,7 +714,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
         onClose={closeViewPanel}
       />
 
-      <AddHistoryModal
+      <AppointmentHistory
         show={showHistoryModal}
         onHide={() => {
           setShowHistoryModal(false);
@@ -748,22 +750,17 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
             }}>
               <Form.Group className="mb-4">
                 <Form.Label className="mb-3">Rating</Form.Label>
-                <div className="d-flex justify-content-center align-items-center py-2">
-                  <StyledRating
-                    name="rating"
-                    value={Number(reviewData.rating) || 0}
-                    onChange={(_, newValue) => {
-                      setReviewData(prev => ({ 
-                        ...prev, 
-                        rating: newValue || 0 
-                      }));
-                      setReviewError(null);
-                    }}
-                    disabled={submitting}
-                    size="large"
-                    precision={1}
-                  />
-                </div>
+                <StarRating
+                  value={Number(reviewData.rating) || 0}
+                  onChange={(newValue) => {
+                    setReviewData(prev => ({ 
+                      ...prev, 
+                      rating: newValue || 0 
+                    }));
+                    setReviewError(null);
+                  }}
+                  disabled={submitting}
+                />
                 {reviewData.rating > 0 && (
                   <div className="text-center text-muted mt-2">
                     {reviewData.rating} {reviewData.rating === 1 ? 'Star' : 'Stars'}
