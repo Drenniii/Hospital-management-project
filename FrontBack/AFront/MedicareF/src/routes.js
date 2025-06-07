@@ -15,6 +15,8 @@ import Settings from "views/Settings.js";
 import Chat from "components/Chat/Chat.js";
 import Account from "views/Account.js";
 import Payments from "views/Admin/Payments.js";
+import MyReviews from "views/MyReviews.js";
+import ProfessionalReviews from "views/ProfessionalReviews.js";
 
 // ==========================================
 // Merr rolin e përdoruesit nga localStorage
@@ -64,6 +66,15 @@ const chatRoute = [
     layout: "/admin",
   },
 ];
+
+// Add reviews route only for regular users
+const userReviewsRoute = {
+  path: "/my-reviews",
+  name: "My Reviews",
+  icon: "nc-icon nc-paper-2",
+  component: MyReviews,
+  layout: "/admin",
+};
 
 // ======================================
 // Rreshtat për appointments (non-admin)
@@ -122,6 +133,13 @@ const therapistRoutes = [
     component: TableList,
     layout: "/admin",
   },
+  {
+    path: "/professional-reviews",
+    name: "Patient Reviews",
+    icon: "nc-icon nc-favourite-28",
+    component: ProfessionalReviews,
+    layout: "/admin",
+  }
 ];
 
 // ========================
@@ -175,6 +193,13 @@ const nutritionistRoutes = [
     component: Dashboard,
     layout: "/admin",
   },
+  {
+    path: "/professional-reviews",
+    name: "Patient Reviews",
+    icon: "nc-icon nc-favourite-28",
+    component: ProfessionalReviews,
+    layout: "/admin",
+  }
 ];
 
 // =====================================================
@@ -190,7 +215,7 @@ const getRoutesByRole = () => {
       routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...therapistRoutes, ...hiddenRoutes];
       break;
     case "USER":
-      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...userRoutes, ...hiddenRoutes];
+      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...userRoutes, userReviewsRoute, ...hiddenRoutes];
       break;
     case "ADMIN":
       routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];

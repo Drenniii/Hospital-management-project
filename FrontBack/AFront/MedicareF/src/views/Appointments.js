@@ -13,28 +13,16 @@ import {
   Nav,
   Tab,
   Dropdown,
+  Form,
   Toast,
   ToastContainer
 } from "react-bootstrap";
+import { Rating } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import StarIcon from '@mui/material/Icon';
 import ApiService from "service/ApiService";
 import DietPlans from "../components/DietPlans/DietPlans";
 import Psychology from "../components/Psychology/Psychology";
-
-// Helper function for status badge variants
-const getStatusBadgeVariant = (status) => {
-  switch (status) {
-    case "SCHEDULED":
-      return "primary";
-    case "COMPLETED":
-      return "success";
-    case "CANCELLED":
-      return "danger";
-    case "NO_SHOW":
-      return "warning";
-    default:
-      return "secondary";
-  }
-};
 
 // Custom Modal Styles
 const modalOverlayStyle = {
@@ -58,6 +46,38 @@ const modalContentStyle = {
   maxHeight: "80vh",
   overflowY: "auto",
   boxShadow: "0 5px 15px rgba(0,0,0,.5)",
+};
+
+// Custom Rating component styles
+const StyledRating = styled(Rating)(({ theme }) => ({
+  '& .MuiRating-iconEmpty': {
+    color: theme.palette.grey[300],
+  },
+  '& .MuiRating-iconFilled': {
+    color: '#ffd700',
+  },
+  '& .MuiRating-iconHover': {
+    color: '#ffb400',
+  },
+  '& .MuiRating-icon': {
+    fontSize: '2.5rem', // Make stars bigger
+  },
+}));
+
+// Helper function for status badge variants
+const getStatusBadgeVariant = (status) => {
+  switch (status) {
+    case "SCHEDULED":
+      return "primary";
+    case "COMPLETED":
+      return "success";
+    case "CANCELLED":
+      return "danger";
+    case "NO_SHOW":
+      return "warning";
+    default:
+      return "secondary";
+  }
 };
 
 // Add History Modal Component
@@ -289,7 +309,7 @@ function AddHistoryModal({ show, onHide, appointmentId, appointment, appointment
                         <Button
                           variant="primary"
                           size="sm"
-                          onClick={handleEdit}
+                          onCancel={cancelEditing}
                           disabled={isSubmitting || !editText.trim()}
                         >
                           {isSubmitting ? "Saving..." : "Save Changes"}
@@ -390,8 +410,18 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
   const [viewPanelVisible, setViewPanelVisible] = useState(false);
   const [showDietPlans, setShowDietPlans] = useState(false);
   const [showPsychology, setShowPsychology] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewData, setReviewData] = useState({ rating: "", comment: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [localAppointments, setLocalAppointments] = useState(appointments);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAppointmentForHistory, setSelectedAppointmentForHistory] = useState(null);
+
+  useEffect(() => {
+    setLocalAppointments(appointments);
+  }, [appointments]);
 
   const handleDelete = (appointmentId, status) => {
     const message = status === "COMPLETED" 
@@ -418,6 +448,46 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
     setShowHistoryModal(true);
   };
 
+  const handleReviewClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setReviewData({ rating: "", comment: "" });
+    setReviewError(null);
+    setShowReviewModal(true);
+  };
+
+  const handleReviewSubmit = async () => {
+    if (!reviewData.rating || !reviewData.comment) {
+      setReviewError("Please provide both rating and comment");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setReviewError(null);
+      
+      await ApiService.createReview(selectedAppointment.id, {
+        rating: parseInt(reviewData.rating),
+        comment: reviewData.comment
+      });
+
+      // Show success toast
+      setShowSuccessToast(true);
+      
+      // Close modal after a short delay for visual feedback
+      setTimeout(() => {
+        setShowReviewModal(false);
+        setSelectedAppointment(null);
+        setReviewData({ rating: "", comment: "" });
+      }, 1000);
+
+    } catch (err) {
+      console.error("Error submitting review:", err);
+      setReviewError(err.response?.data?.message || "Failed to submit review. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Get unique clients from completed appointments
   const getUniqueCompletedClients = () => {
     const uniqueClients = new Map();
@@ -433,6 +503,27 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
 
   return (
     <>
+      <ToastContainer 
+        position="top-end" 
+        className="p-3" 
+        style={{ zIndex: 1060 }}
+      >
+        <Toast 
+          show={showSuccessToast} 
+          onClose={() => setShowSuccessToast(false)}
+          delay={3000} 
+          autohide
+          bg="success"
+        >
+          <Toast.Header closeButton={false}>
+            <strong className="me-auto">Success!</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">
+            Your review has been submitted successfully!
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       <Table responsive>
         <thead>
           <tr>
@@ -444,7 +535,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
           </tr>
         </thead>
         <tbody>
-          {appointments.map((appointment) => {
+          {localAppointments.map((appointment) => {
             if (appointment.status === "COMPLETED") {
               // For completed appointments, only show one row per client
               const isFirstAppearance = getUniqueCompletedClients()
@@ -528,31 +619,69 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                         Cancel
                       </Button>
                     </>
-                  ) : appointment.status === "COMPLETED" && (userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+                  ) : appointment.status === "COMPLETED" && (
                     <>
-                      <Button
-                        variant="info"
-                        size="sm"
-                        className="me-2 mr-3"
-                        onClick={() => openViewPanel(appointment)}
-                      >
-                        View Details
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="me-2 mr-3"
-                        onClick={() => openHistoryModal(appointment)}
-                      >
-                        History
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(appointment.id, appointment.status)}
-                      >
-                        Delete Record
-                      </Button>
+                      {(userRole === "THERAPIST" || userRole === "NUTRICIST") && (
+                        <>
+                          <Button
+                            variant="info"
+                            size="sm"
+                            className="me-2 mr-3"
+                            onClick={() => openViewPanel(appointment)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="me-2 mr-3"
+                            onClick={() => openHistoryModal(appointment)}
+                          >
+                            History
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDelete(appointment.id, appointment.status)}
+                          >
+                            Delete Record
+                          </Button>
+                        </>
+                      )}
+                      {userRole === "USER" && (
+                        <>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => handleReviewClick(appointment)}
+                          >
+                            Write Review
+                          </Button>
+                          {appointment.type === "NUTRITION" && (
+                            <Button
+                              variant="info"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => setShowDietPlans(true)}
+                            >
+                              <i className="nc-icon nc-paper-2 mr-1"></i>
+                              View Diet Plans
+                            </Button>
+                          )}
+                          {appointment.type === "THERAPY" && (
+                            <Button
+                              variant="info"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => setShowPsychology(true)}
+                            >
+                              <i className="nc-icon nc-sound-wave mr-1"></i>
+                              View Resources
+                            </Button>
+                          )}
+                        </>
+                      )}
                     </>
                   )}
                 </td>
@@ -576,7 +705,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
         }}
         appointmentId={selectedAppointmentForHistory?.id}
         appointment={selectedAppointmentForHistory}
-        appointments={appointments}
+        appointments={localAppointments}
       />
 
       <DietPlans 
@@ -588,6 +717,88 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
         show={showPsychology} 
         onHide={() => setShowPsychology(false)} 
       />
+
+      {showReviewModal && (
+        <div style={modalOverlayStyle} onClick={() => !submitting && setShowReviewModal(false)}>
+          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <h4 className="mb-4">Write a Review</h4>
+            {reviewError && (
+              <Alert variant="danger" className="mb-3">
+                {reviewError}
+              </Alert>
+            )}
+            <Form onSubmit={(e) => {
+              e.preventDefault();
+              handleReviewSubmit();
+            }}>
+              <Form.Group className="mb-4">
+                <Form.Label className="mb-3">Rating</Form.Label>
+                <div className="d-flex justify-content-center align-items-center py-2">
+                  <StyledRating
+                    name="rating"
+                    value={Number(reviewData.rating)}
+                    onChange={(_, newValue) => {
+                      setReviewData({ ...reviewData, rating: newValue });
+                    }}
+                    disabled={submitting}
+                    size="large"
+                    precision={1}
+                    hover
+                  />
+                </div>
+                {reviewData.rating > 0 && (
+                  <div className="text-center text-muted mt-2">
+                    {reviewData.rating} {reviewData.rating === 1 ? 'Star' : 'Stars'}
+                  </div>
+                )}
+              </Form.Group>
+              <Form.Group className="mb-4">
+                <Form.Label>Your Review</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={reviewData.comment}
+                  onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                  placeholder="Share your experience..."
+                  disabled={submitting}
+                  required
+                />
+              </Form.Group>
+              <div className="d-flex justify-content-end">
+                <Button
+                  variant="secondary"
+                  className="me-2"
+                  onClick={() => !submitting && setShowReviewModal(false)}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  disabled={submitting || !reviewData.rating}
+                >
+                  {submitting ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Review"
+                  )}
+                </Button>
+              </div>
+            </Form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -810,4 +1021,4 @@ function Appointments() {
   );
 }
 
-export default Appointments; 
+export default Appointments;

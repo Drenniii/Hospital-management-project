@@ -69,7 +69,7 @@ export default class ApiService {
     return response.data;
   }
 
-  static async updateTask(taskId, updatedTaskData) {
+  static async updateTask(taskId) {
     const response = await axios.put(`${this.BASE_URL}/api/v1/tasks/${taskId}`, updatedTaskData, {
       headers: this.getHeaders()
     });
@@ -507,48 +507,93 @@ export default class ApiService {
     }
   }
 
-// POST /api/payments
-static async processPayment(paymentRequest) {
-  try {
+  // === Reviews ===
+  static async createReview(appointmentId, reviewData) {
     const response = await axios.post(
-      `${this.BASE_URL}/api/payments`,
-      paymentRequest,
+      `${this.BASE_URL}/api/v1/reviews/appointment/${appointmentId}`,
+      reviewData,
       { headers: this.getHeaders() }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error processing payment:", error.response || error);
-    throw error;
   }
-}
 
-// GET /api/payments
-static async getAllPayments() {
-  try {
-    const response = await axios.get(`${this.BASE_URL}/api/payments`, {
+  static async getReviewByAppointment(appointmentId) {
+    const response = await axios.get(
+      `${this.BASE_URL}/api/v1/reviews/appointment/${appointmentId}`,
+      { headers: this.getHeaders() }
+    );
+    return response.data;
+  }
+
+  static async getProfessionalReviews(professionalId) {
+    const response = await axios.get(
+      `${this.BASE_URL}/api/v1/reviews/professional/${professionalId}`,
+      { headers: this.getHeaders() }
+    );
+    return response.data;
+  }
+
+  static async getProfessionalRating(professionalId) {
+    const response = await axios.get(
+      `${this.BASE_URL}/api/v1/reviews/professional/${professionalId}/rating`,
+      { headers: this.getHeaders() }
+    );
+    return response.data;
+  }
+
+  static async deleteReview(reviewId) {
+    const response = await axios.delete(`${this.BASE_URL}/api/v1/reviews/${reviewId}`, {
       headers: this.getHeaders()
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching payments:", error.response || error);
-    throw error;
   }
-}
 
-// GET /api/payments/credits/{userId}
-static async getUserCredits(userId) {
-  try {
-    const response = await axios.get(
-      `${this.BASE_URL}/api/payments/credits/${userId}`,
-      { headers: this.getHeaders() }
-    );
+  static async updateReview(reviewId, reviewData) {
+    const response = await axios.put(`${this.BASE_URL}/api/v1/reviews/${reviewId}`, reviewData, {
+      headers: this.getHeaders()
+    });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching user credits:", error.response || error);
-    throw error;
+  }
+
+  // POST /api/payments
+  static async processPayment(paymentRequest) {
+    try {
+      const response = await axios.post(
+        `${this.BASE_URL}/api/payments/process`,
+        paymentRequest,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error processing payment:", error.response || error);
+      throw error;
+    }
+  }
+
+  // GET /api/payments
+  static async getAllPayments() {
+    try {
+      const response = await axios.get(`${this.BASE_URL}/api/payments`, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching payments:", error.response || error);
+      throw error;
+    }
+  }
+
+  // GET /api/payments/credits/{userId}
+  static async getUserCredits(userId) {
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/api/users/${userId}/credits`,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user credits:", error.response || error);
+      throw error;
+    }
   }
 }
-
-
-}
-//api.
