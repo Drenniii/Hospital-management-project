@@ -418,10 +418,33 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
   const [localAppointments, setLocalAppointments] = useState(appointments);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAppointmentForHistory, setSelectedAppointmentForHistory] = useState(null);
+  const [reviewedAppointments, setReviewedAppointments] = useState(new Set());
 
   useEffect(() => {
     setLocalAppointments(appointments);
+    // Load reviewed appointments
+    loadReviewedAppointments();
   }, [appointments]);
+
+  const loadReviewedAppointments = async () => {
+    try {
+      const reviewed = new Set();
+      for (const appointment of appointments) {
+        try {
+          const review = await ApiService.getReviewByAppointment(appointment.id);
+          if (review) {
+            reviewed.add(appointment.id);
+          }
+        } catch (err) {
+          // Ignore errors - if we can't get the review, assume it doesn't exist
+          console.log(`No review found for appointment ${appointment.id}`);
+        }
+      }
+      setReviewedAppointments(reviewed);
+    } catch (err) {
+      console.error("Error loading reviewed appointments:", err);
+    }
+  };
 
   const handleDelete = (appointmentId, status) => {
     const message = status === "COMPLETED" 
@@ -456,7 +479,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
   };
 
   const handleReviewSubmit = async () => {
-    if (!reviewData.rating || !reviewData.comment) {
+    if (!reviewData.rating || !reviewData.comment.trim()) {
       setReviewError("Please provide both rating and comment");
       return;
     }
@@ -465,10 +488,30 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
       setSubmitting(true);
       setReviewError(null);
       
-      await ApiService.createReview(selectedAppointment.id, {
-        rating: parseInt(reviewData.rating),
-        comment: reviewData.comment
+      // Ensure rating is a valid number between 1 and 5
+      const rating = Math.min(Math.max(Number(reviewData.rating), 1), 5);
+      
+      // Validate appointment ID
+      if (!selectedAppointment?.id) {
+        throw new Error('Invalid appointment ID');
+      }
+
+      const reviewPayload = {
+        rating,
+        comment: reviewData.comment.trim()
+      };
+      
+      console.log('Review submission details:', {
+        appointmentId: selectedAppointment.id,
+        payload: reviewPayload,
+        appointment: selectedAppointment
       });
+
+      const response = await ApiService.createReview(selectedAppointment.id, reviewPayload);
+      console.log('Review submission response:', response);
+
+      // Update reviewed appointments list
+      setReviewedAppointments(prev => new Set([...prev, selectedAppointment.id]));
 
       // Show success toast
       setShowSuccessToast(true);
@@ -478,10 +521,17 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
         setShowReviewModal(false);
         setSelectedAppointment(null);
         setReviewData({ rating: "", comment: "" });
-      }, 1000);
+      }, 2000);
 
     } catch (err) {
       console.error("Error submitting review:", err);
+      console.error("Error details:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.response?.data?.message || err.message,
+        appointmentId: selectedAppointment?.id,
+        reviewData: reviewData
+      });
       setReviewError(err.response?.data?.message || "Failed to submit review. Please try again.");
     } finally {
       setSubmitting(false);
@@ -536,13 +586,6 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
         </thead>
         <tbody>
           {localAppointments.map((appointment) => {
-            if (appointment.status === "COMPLETED") {
-              // For completed appointments, only show one row per client
-              const isFirstAppearance = getUniqueCompletedClients()
-                .find(app => app.id === appointment.id);
-              if (!isFirstAppearance) return null;
-            }
-            
             return (
               <tr key={appointment.id}>
                 <td>
@@ -626,7 +669,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                           <Button
                             variant="info"
                             size="sm"
-                            className="me-2 mr-3"
+                            className="me-2"
                             onClick={() => openViewPanel(appointment)}
                           >
                             View Details
@@ -634,53 +677,25 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                           <Button
                             variant="primary"
                             size="sm"
-                            className="me-2 mr-3"
+                            className="me-2"
                             onClick={() => openHistoryModal(appointment)}
                           >
                             History
                           </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => handleDelete(appointment.id, appointment.status)}
-                          >
-                            Delete Record
-                          </Button>
                         </>
                       )}
-                      {userRole === "USER" && (
-                        <>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            className="me-2"
-                            onClick={() => handleReviewClick(appointment)}
-                          >
-                            Write Review
-                          </Button>
-                          {appointment.type === "NUTRITION" && (
-                            <Button
-                              variant="info"
-                              size="sm"
-                              className="me-2"
-                              onClick={() => setShowDietPlans(true)}
-                            >
-                              <i className="nc-icon nc-paper-2 mr-1"></i>
-                              View Diet Plans
-                            </Button>
-                          )}
-                          {appointment.type === "THERAPY" && (
-                            <Button
-                              variant="info"
-                              size="sm"
-                              className="me-2"
-                              onClick={() => setShowPsychology(true)}
-                            >
-                              <i className="nc-icon nc-sound-wave mr-1"></i>
-                              View Resources
-                            </Button>
-                          )}
-                        </>
+                      {userRole === "USER" && !reviewedAppointments.has(appointment.id) && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => handleReviewClick(appointment)}
+                        >
+                          Write Review
+                        </Button>
+                      )}
+                      {userRole === "USER" && reviewedAppointments.has(appointment.id) && (
+                        <Badge bg="success">Reviewed</Badge>
                       )}
                     </>
                   )}
@@ -736,14 +751,17 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                 <div className="d-flex justify-content-center align-items-center py-2">
                   <StyledRating
                     name="rating"
-                    value={Number(reviewData.rating)}
+                    value={Number(reviewData.rating) || 0}
                     onChange={(_, newValue) => {
-                      setReviewData({ ...reviewData, rating: newValue });
+                      setReviewData(prev => ({ 
+                        ...prev, 
+                        rating: newValue || 0 
+                      }));
+                      setReviewError(null);
                     }}
                     disabled={submitting}
                     size="large"
                     precision={1}
-                    hover
                   />
                 </div>
                 {reviewData.rating > 0 && (
@@ -758,7 +776,13 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                   as="textarea"
                   rows={3}
                   value={reviewData.comment}
-                  onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                  onChange={(e) => {
+                    setReviewData(prev => ({
+                      ...prev,
+                      comment: e.target.value
+                    }));
+                    setReviewError(null);
+                  }}
                   placeholder="Share your experience..."
                   disabled={submitting}
                   required
@@ -776,7 +800,7 @@ function AppointmentTable({ appointments, userRole, onStatusUpdate, onDelete }) 
                 <Button
                   variant="primary"
                   type="submit"
-                  disabled={submitting || !reviewData.rating}
+                  disabled={submitting || !reviewData.rating || !reviewData.comment.trim()}
                 >
                   {submitting ? (
                     <>
@@ -950,69 +974,52 @@ function Appointments() {
               </div>
             </Card.Header>
             <Card.Body>
-              {userRole === "USER" ? (
-                // For regular users, only show active appointments
-                activeAppointments.length === 0 ? (
-                  <div className="text-center p-3">
-                    <p className="mb-0">No active appointments found.</p>
-                  </div>
-                ) : (
-                  <AppointmentTable
-                    appointments={activeAppointments}
-                    userRole={userRole}
-                    onStatusUpdate={handleStatusUpdate}
-                    onDelete={handleDelete}
-                  />
-                )
-              ) : (
-                // For professionals (therapists and nutritionists), show tabs
-                <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
-                  <Nav variant="tabs" className="mb-3">
-                    <Nav.Item>
-                      <Nav.Link eventKey="active">
-                        Active Appointments {activeAppointments.length > 0 && 
-                          <Badge bg="primary">{activeAppointments.length}</Badge>}
-                      </Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="completed">
-                        Completed Appointments {completedAppointments.length > 0 && 
-                          <Badge bg="success">{completedAppointments.length}</Badge>}
-                      </Nav.Link>
-                    </Nav.Item>
-                  </Nav>
-                  <Tab.Content>
-                    <Tab.Pane eventKey="active">
-                      {activeAppointments.length === 0 ? (
-                        <div className="text-center p-3">
-                          <p className="mb-0">No active appointments found.</p>
-                        </div>
-                      ) : (
-                        <AppointmentTable
-                          appointments={activeAppointments}
-                          userRole={userRole}
-                          onStatusUpdate={handleStatusUpdate}
-                          onDelete={handleDelete}
-                        />
-                      )}
-                    </Tab.Pane>
-                    <Tab.Pane eventKey="completed">
-                      {completedAppointments.length === 0 ? (
-                        <div className="text-center p-3">
-                          <p className="mb-0">No completed appointments found.</p>
-                        </div>
-                      ) : (
-                        <AppointmentTable
-                          appointments={completedAppointments}
-                          userRole={userRole}
-                          onStatusUpdate={handleStatusUpdate}
-                          onDelete={handleDelete}
-                        />
-                      )}
-                    </Tab.Pane>
-                  </Tab.Content>
-                </Tab.Container>
-              )}
+              <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+                <Nav variant="tabs" className="mb-3">
+                  <Nav.Item>
+                    <Nav.Link eventKey="active">
+                      Active Appointments {activeAppointments.length > 0 && 
+                        <Badge bg="primary">{activeAppointments.length}</Badge>}
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="completed">
+                      Completed Appointments {completedAppointments.length > 0 && 
+                        <Badge bg="success">{completedAppointments.length}</Badge>}
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+                <Tab.Content>
+                  <Tab.Pane eventKey="active">
+                    {activeAppointments.length === 0 ? (
+                      <div className="text-center p-3">
+                        <p className="mb-0">No active appointments found.</p>
+                      </div>
+                    ) : (
+                      <AppointmentTable
+                        appointments={activeAppointments}
+                        userRole={userRole}
+                        onStatusUpdate={handleStatusUpdate}
+                        onDelete={handleDelete}
+                      />
+                    )}
+                  </Tab.Pane>
+                  <Tab.Pane eventKey="completed">
+                    {completedAppointments.length === 0 ? (
+                      <div className="text-center p-3">
+                        <p className="mb-0">No completed appointments found.</p>
+                      </div>
+                    ) : (
+                      <AppointmentTable
+                        appointments={completedAppointments}
+                        userRole={userRole}
+                        onStatusUpdate={handleStatusUpdate}
+                        onDelete={handleDelete}
+                      />
+                    )}
+                  </Tab.Pane>
+                </Tab.Content>
+              </Tab.Container>
             </Card.Body>
           </Card>
         </Col>

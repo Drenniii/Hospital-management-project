@@ -509,12 +509,49 @@ export default class ApiService {
 
   // === Reviews ===
   static async createReview(appointmentId, reviewData) {
-    const response = await axios.post(
-      `${this.BASE_URL}/api/v1/reviews/appointment/${appointmentId}`,
-      reviewData,
-      { headers: this.getHeaders() }
-    );
-    return response.data;
+    try {
+      if (!appointmentId) {
+        throw new Error('Appointment ID is required');
+      }
+
+      if (!reviewData.rating || !reviewData.comment) {
+        throw new Error('Rating and comment are required');
+      }
+
+      console.log('Creating review:', {
+        endpoint: `${this.BASE_URL}/api/v1/reviews/appointment/${appointmentId}`,
+        appointmentId,
+        reviewData,
+        headers: this.getHeaders()
+      });
+      
+      const response = await axios.post(
+        `${this.BASE_URL}/api/v1/reviews/appointment/${appointmentId}`,
+        {
+          rating: Number(reviewData.rating),
+          comment: reviewData.comment.trim()
+        },
+        { 
+          headers: {
+            ...this.getHeaders(),
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Review creation response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating review:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        appointmentId,
+        reviewData
+      });
+      throw error;
+    }
   }
 
   static async getReviewByAppointment(appointmentId) {
