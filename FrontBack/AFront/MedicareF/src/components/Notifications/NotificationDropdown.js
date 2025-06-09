@@ -7,6 +7,7 @@ const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -43,6 +44,21 @@ const NotificationDropdown = () => {
     }
   };
 
+  const handleDropdownToggle = async (isOpen) => {
+    setShow(isOpen);
+    if (isOpen && unreadCount > 0) {
+      try {
+        // Mark all notifications as read in the backend
+        await ApiService.markAllNotificationsAsRead();
+        // Update local state
+        setUnreadCount(0);
+        setNotifications(notifications.map(notif => ({ ...notif, isRead: true })));
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+      }
+    }
+  };
+
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -58,7 +74,12 @@ const NotificationDropdown = () => {
   };
 
   return (
-    <Dropdown align="end" className="notification-dropdown">
+    <Dropdown 
+      align="end" 
+      className="notification-dropdown"
+      show={show}
+      onToggle={handleDropdownToggle}
+    >
       <Dropdown.Toggle variant="link" id="notification-dropdown" className="notification-toggle">
         <i className="nc-icon nc-bell-55"></i>
         {unreadCount > 0 && (

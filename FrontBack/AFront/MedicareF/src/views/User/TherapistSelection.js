@@ -315,6 +315,47 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
 
 // Add TherapistProfileModal component
 function TherapistProfileModal({ show, onClose, therapist }) {
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (show && therapist) {
+      loadReviews();
+    }
+  }, [show, therapist]);
+
+  const loadReviews = async () => {
+    try {
+      const reviewsData = await ApiService.getProfessionalReviews(therapist.id);
+      
+      // Calculate simple average: total stars / number of reviews
+      const totalStars = reviewsData.reduce((sum, review) => sum + review.rating, 0);
+      const average = reviewsData.length > 0 ? totalStars / reviewsData.length : 0;
+      
+      setAverageRating(average);
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const StarRating = ({ value, readOnly }) => {
+    const stars = [1, 2, 3, 4, 5];
+    return (
+      <div className="d-flex align-items-center">
+        {stars.map((star) => (
+          <i
+            key={star}
+            className={`fas fa-star mx-1 ${value >= star ? 'text-warning' : 'text-muted'}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   if (!show || !therapist) return null;
 
   return (
@@ -353,77 +394,98 @@ function TherapistProfileModal({ show, onClose, therapist }) {
           )}
         </div>
 
-        <div className="profile-details">
-          <h3 className="text-center mb-4" style={{ color: '#0d6efd' }}>
-            {therapist.firstname} {therapist.lastname}
-          </h3>
-          
-          {therapist.description && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-comment-medical me-2"></i>
-                Description
-              </h6>
-              <p>{therapist.description}</p>
+        <h3 className="text-center mb-4" style={{ color: '#0d6efd' }}>
+          {therapist.firstname} {therapist.lastname}
+        </h3>
+
+        {/* Reviews Section */}
+        <div style={sectionStyle} className="profile-section">
+          <h6>
+            <i className="fas fa-star me-2"></i>
+            Rating
+          </h6>
+          {loading ? (
+            <div className="text-center p-3">
+              <i className="fas fa-spinner fa-spin"></i>
             </div>
-          )}
-
-          <div style={sectionStyle} className="profile-section">
-            <h6>
-              <i className="fas fa-address-card" style={{ marginRight: '20px' }}></i>
-              Contact Information
-            </h6>
-            <p><strong>Email:</strong> {therapist.email}</p>
-            {therapist.phoneNumber && <p><strong>Phone:</strong> {therapist.phoneNumber}</p>}
-            {therapist.address && <p><strong>Address:</strong> {therapist.address}</p>}
-          </div>
-
-          {therapist.specialization && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-star me-2"></i>
-                Specialization
-              </h6>
-              <p>{therapist.specialization}</p>
-            </div>
-          )}
-
-          {therapist.experience && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-briefcase me-2"></i>
-                Experience
-              </h6>
-              <p>{therapist.experience}</p>
-            </div>
-          )}
-
-          {therapist.education && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-graduation-cap me-2"></i>
-                Education
-              </h6>
-              <p>{therapist.education}</p>
-            </div>
-          )}
-
-          {therapist.about && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-user" style={{ marginRight: '20px' }}></i>
-                About
-              </h6>
-              <p>{therapist.about}</p>
+          ) : (
+            <div className="text-center">
+              <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#0d6efd', marginBottom: '10px' }}>
+                {averageRating.toFixed(1)}
+              </div>
+              <StarRating value={Math.round(averageRating)} readOnly />
+              <p className="text-muted mt-2">
+                {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+              </p>
             </div>
           )}
         </div>
+          
+        {therapist.description && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-comment-medical me-2"></i>
+              Description
+            </h6>
+            <p>{therapist.description}</p>
+          </div>
+        )}
+
+        <div style={sectionStyle} className="profile-section">
+          <h6>
+            <i className="fas fa-address-card" style={{ marginRight: '20px' }}></i>
+            Contact Information
+          </h6>
+          <p><strong>Email:</strong> {therapist.email}</p>
+          {therapist.phoneNumber && <p><strong>Phone:</strong> {therapist.phoneNumber}</p>}
+          {therapist.address && <p><strong>Address:</strong> {therapist.address}</p>}
+        </div>
+
+        {therapist.specialization && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-star me-2"></i>
+              Specialization
+            </h6>
+            <p>{therapist.specialization}</p>
+          </div>
+        )}
+
+        {therapist.experience && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-briefcase me-2"></i>
+              Experience
+            </h6>
+            <p>{therapist.experience}</p>
+          </div>
+        )}
+
+        {therapist.education && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-graduation-cap me-2"></i>
+              Education
+            </h6>
+            <p>{therapist.education}</p>
+          </div>
+        )}
+
+        {therapist.about && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-user" style={{ marginRight: '20px' }}></i>
+              About
+            </h6>
+            <p>{therapist.about}</p>
+          </div>
+        )}
 
         <div className="text-center mt-4">
           <Button 
-            variant="primary " 
+            variant="primary" 
             onClick={onClose}
-            className="px-4 py-2 "
+            className="px-4 py-2"
             style={{
               borderRadius: '50px',
               fontSize: '1.1rem',

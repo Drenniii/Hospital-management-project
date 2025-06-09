@@ -315,6 +315,47 @@ function BookingModal({ show, onClose, nutritionist, onConfirm }) {
 
 // Add NutritionistProfileModal component
 function NutritionistProfileModal({ show, onClose, nutritionist }) {
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (show && nutritionist) {
+      loadReviews();
+    }
+  }, [show, nutritionist]);
+
+  const loadReviews = async () => {
+    try {
+      const reviewsData = await ApiService.getProfessionalReviews(nutritionist.id);
+      
+      // Calculate simple average: total stars / number of reviews
+      const totalStars = reviewsData.reduce((sum, review) => sum + review.rating, 0);
+      const average = reviewsData.length > 0 ? totalStars / reviewsData.length : 0;
+      
+      setAverageRating(average);
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const StarRating = ({ value, readOnly }) => {
+    const stars = [1, 2, 3, 4, 5];
+    return (
+      <div className="d-flex align-items-center">
+        {stars.map((star) => (
+          <i
+            key={star}
+            className={`fas fa-star mx-1 ${value >= star ? 'text-warning' : 'text-muted'}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   if (!show || !nutritionist) return null;
 
   return (
@@ -353,71 +394,92 @@ function NutritionistProfileModal({ show, onClose, nutritionist }) {
           )}
         </div>
 
-        <div className="profile-details">
-          <h3 className="text-center mb-4" style={{ color: '#0d6efd' }}>
-            {nutritionist.firstname} {nutritionist.lastname}
-          </h3>
-          
-          {nutritionist.description && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-comment-medical me-2"></i>
-                Description
-              </h6>
-              <p>{nutritionist.description}</p>
+        <h3 className="text-center mb-4" style={{ color: '#0d6efd' }}>
+          {nutritionist.firstname} {nutritionist.lastname}
+        </h3>
+
+        {/* Reviews Section */}
+        <div style={sectionStyle} className="profile-section">
+          <h6>
+            <i className="fas fa-star me-2"></i>
+            Rating
+          </h6>
+          {loading ? (
+            <div className="text-center p-3">
+              <i className="fas fa-spinner fa-spin"></i>
             </div>
-          )}
-
-          <div style={sectionStyle} className="profile-section">
-            <h6>
-              <i className="fas fa-address-card" style={{ marginRight: '20px' }}></i>
-              Contact Information
-            </h6>
-            <p><strong>Email:</strong> {nutritionist.email}</p>
-            {nutritionist.phoneNumber && <p><strong>Phone:</strong> {nutritionist.phoneNumber}</p>}
-            {nutritionist.address && <p><strong>Address:</strong> {nutritionist.address}</p>}
-          </div>
-
-          {nutritionist.specialization && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-star me-2"></i>
-                Specialization
-              </h6>
-              <p>{nutritionist.specialization}</p>
-            </div>
-          )}
-
-          {nutritionist.experience && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-briefcase me-2"></i>
-                Experience
-              </h6>
-              <p>{nutritionist.experience}</p>
-            </div>
-          )}
-
-          {nutritionist.education && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-graduation-cap me-2"></i>
-                Education
-              </h6>
-              <p>{nutritionist.education}</p>
-            </div>
-          )}
-
-          {nutritionist.about && (
-            <div style={sectionStyle} className="profile-section">
-              <h6>
-                <i className="fas fa-user" style={{ marginRight: '20px' }}></i>
-                About
-              </h6>
-              <p>{nutritionist.about}</p>
+          ) : (
+            <div className="text-center">
+              <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#0d6efd', marginBottom: '10px' }}>
+                {averageRating.toFixed(1)}
+              </div>
+              <StarRating value={Math.round(averageRating)} readOnly />
+              <p className="text-muted mt-2">
+                {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+              </p>
             </div>
           )}
         </div>
+          
+        {nutritionist.description && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-comment-medical me-2"></i>
+              Description
+            </h6>
+            <p>{nutritionist.description}</p>
+          </div>
+        )}
+
+        <div style={sectionStyle} className="profile-section">
+          <h6>
+            <i className="fas fa-address-card" style={{ marginRight: '20px' }}></i>
+            Contact Information
+          </h6>
+          <p><strong>Email:</strong> {nutritionist.email}</p>
+          {nutritionist.phoneNumber && <p><strong>Phone:</strong> {nutritionist.phoneNumber}</p>}
+          {nutritionist.address && <p><strong>Address:</strong> {nutritionist.address}</p>}
+        </div>
+
+        {nutritionist.specialization && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-star me-2"></i>
+              Specialization
+            </h6>
+            <p>{nutritionist.specialization}</p>
+          </div>
+        )}
+
+        {nutritionist.experience && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-briefcase me-2"></i>
+              Experience
+            </h6>
+            <p>{nutritionist.experience}</p>
+          </div>
+        )}
+
+        {nutritionist.education && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-graduation-cap me-2"></i>
+              Education
+            </h6>
+            <p>{nutritionist.education}</p>
+          </div>
+        )}
+
+        {nutritionist.about && (
+          <div style={sectionStyle} className="profile-section">
+            <h6>
+              <i className="fas fa-user" style={{ marginRight: '20px' }}></i>
+              About
+            </h6>
+            <p>{nutritionist.about}</p>
+          </div>
+        )}
 
         <div className="text-center mt-4">
           <Button 

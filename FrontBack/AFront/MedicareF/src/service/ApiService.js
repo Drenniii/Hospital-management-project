@@ -69,7 +69,7 @@ export default class ApiService {
     return response.data;
   }
 
-  static async updateTask(taskId) {
+  static async updateTask(taskId, updatedTaskData) {
     const response = await axios.put(`${this.BASE_URL}/api/v1/tasks/${taskId}`, updatedTaskData, {
       headers: this.getHeaders()
     });
@@ -331,6 +331,20 @@ export default class ApiService {
       return response.data;
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  }
+
+  static async markAllNotificationsAsRead() {
+    try {
+      const response = await axios.put(
+        `${this.BASE_URL}/api/notifications/mark-all-read`,
+        {},
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
       throw error;
     }
   }
