@@ -182,7 +182,11 @@ function BookingModal({ show, onClose, therapist, onConfirm }) {
       const [hours] = selectedTime.split(':');
       const dateTime = new Date(year, month - 1, day, parseInt(hours), 0, 0, 0);
       
-      const formattedDate = dateTime.toISOString().replace('Z', '');
+      // Add the timezone offset to keep the local time when converting to ISO string
+      const userTimezoneOffset = dateTime.getTimezoneOffset() * 60000;
+      const formattedDate = new Date(dateTime.getTime() - userTimezoneOffset)
+        .toISOString()
+        .replace('Z', '');
 
       const currentUser = await ApiService.getCurrentUser();
 

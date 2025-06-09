@@ -95,9 +95,13 @@ function CreateAppointment({ onHide, onAppointmentCreated }) {
     setError(null);
 
     try {
-      // Format the date properly for the backend
+      // Format the date properly for the backend, preserving the local time
       const dateObj = new Date(formData.appointmentDateTime);
-      const formattedDate = dateObj.toISOString().replace('Z', '');
+      // Add the timezone offset to keep the local time when converting to ISO string
+      const userTimezoneOffset = dateObj.getTimezoneOffset() * 60000;
+      const formattedDate = new Date(dateObj.getTime() - userTimezoneOffset)
+        .toISOString()
+        .replace('Z', '');
 
       console.log('Sending appointment data:', {
         clientId: currentUser.id,
