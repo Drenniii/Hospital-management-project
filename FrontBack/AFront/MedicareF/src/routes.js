@@ -30,22 +30,7 @@ const getUserRole = () => {
 // ======================================
 // Rreshtat që janë për të gjithë (common)
 // ======================================
-const commonRoutes = [
-  {
-    path: "/user",
-    name: "User Profile",
-    icon: "nc-icon nc-circle-09",
-    component: UserProfile,
-    layout: "/admin",
-  },
-  {
-    path: "/notifications",
-    name: "Notifications",
-    icon: "nc-icon nc-bell-55",
-    component: Notifications,
-    layout: "/admin",
-  },
-];
+const commonRoutes = [];
 
 // ======================================
 // Chat route for non-admin users
@@ -120,10 +105,10 @@ const therapistRoutes = [
     layout: "/admin",
   },
   {
-    path: "/table",
-    name: "Table List",
-    icon: "nc-icon nc-notes",
-    component: TableList,
+    path: "/user",
+    name: "User Profile",
+    icon: "nc-icon nc-circle-09",
+    component: UserProfile,
     layout: "/admin",
   },
   {
@@ -144,6 +129,13 @@ const userRoutes = [
     name: "Dashboard",
     icon: "nc-icon nc-chart-pie-35",
     component: UserDashboard,
+    layout: "/admin",
+  },
+  {
+    path: "/user",
+    name: "User Profile",
+    icon: "nc-icon nc-circle-09",
+    component: UserProfile,
     layout: "/admin",
   },
   {
@@ -174,6 +166,13 @@ const adminRoutes = [
     layout: "/admin",
   },
   {
+    path: "/user",
+    name: "User Profile",
+    icon: "nc-icon nc-circle-09",
+    component: UserProfile,
+    layout: "/admin",
+  },
+  {
     path: "/payments",
     name: "Payments",
     icon: "nc-icon nc-money-coins",
@@ -191,6 +190,13 @@ const nutritionistRoutes = [
     name: "Dashboard",
     icon: "nc-icon nc-chart-pie-35",
     component: Dashboard,
+    layout: "/admin",
+  },
+  {
+    path: "/user",
+    name: "User Profile",
+    icon: "nc-icon nc-circle-09",
+    component: UserProfile,
     layout: "/admin",
   },
   {
@@ -212,19 +218,19 @@ const getRoutesByRole = () => {
   let routes;
   switch (role) {
     case "THERAPIST":
-      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...therapistRoutes, ...hiddenRoutes];
+      routes = [...therapistRoutes, ...chatRoute, ...appointmentRoutes, ...hiddenRoutes];
       break;
     case "USER":
-      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...userRoutes, userReviewsRoute, ...hiddenRoutes];
+      routes = [...userRoutes, ...chatRoute, ...appointmentRoutes, userReviewsRoute, ...hiddenRoutes];
       break;
     case "ADMIN":
-      routes = [...commonRoutes, ...adminRoutes, ...hiddenRoutes];
+      routes = [...adminRoutes, ...hiddenRoutes];
       break;
     case "NUTRICIST":
-      routes = [...commonRoutes, ...chatRoute, ...appointmentRoutes, ...nutritionistRoutes, ...hiddenRoutes];
+      routes = [...nutritionistRoutes, ...chatRoute, ...appointmentRoutes, ...hiddenRoutes];
       break;
     default:
-      routes = [...commonRoutes, ...hiddenRoutes];
+      routes = [...hiddenRoutes];
   }
 
   console.log("Returned routes:", routes);
