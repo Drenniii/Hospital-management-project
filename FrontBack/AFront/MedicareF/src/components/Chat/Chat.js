@@ -29,7 +29,10 @@ const modalContentStyle = {
 
 // New Chat Panel Component
 function NewChatPanel({ show, onClose, availableUsers, selectedUser, onUserSelect, onStartChat }) {
+  const userRole = localStorage.getItem('userRole');
   if (!show) return null;
+
+  const isProfessional = userRole === 'THERAPIST' || userRole === 'NUTRICIST';
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
@@ -37,7 +40,7 @@ function NewChatPanel({ show, onClose, availableUsers, selectedUser, onUserSelec
         <h4>Start New Chat</h4>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Select User</Form.Label>
+            <Form.Label>{isProfessional ? 'Select Client' : 'Select Professional'}</Form.Label>
             {availableUsers.length > 0 ? (
               <Form.Control
                 as="select"
@@ -47,15 +50,19 @@ function NewChatPanel({ show, onClose, availableUsers, selectedUser, onUserSelec
                   onUserSelect(user);
                 }}
               >
-                <option value="">Select a user...</option>
+                <option value="">{isProfessional ? 'Select a client...' : 'Select a professional...'}</option>
                 {availableUsers.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.firstname} {user.lastname} {user.role === 'THERAPIST' ? '(Therapist)' : user.role === 'NUTRICIST' ? '(Nutritionist)' : ''}
+                    {user.firstname} {user.lastname} {!isProfessional && user.role === 'THERAPIST' ? '(Therapist)' : user.role === 'NUTRICIST' ? '(Nutritionist)' : ''}
                   </option>
                 ))}
               </Form.Control>
             ) : (
-              <p className="text-muted">No available users found</p>
+              <p className="text-muted">
+                {isProfessional 
+                  ? 'No clients available. Wait for appointments to be booked.'
+                  : 'No professionals available. Book an appointment first to start chatting.'}
+              </p>
             )}
           </Form.Group>
         </Form>
@@ -113,16 +120,42 @@ const Chat = () => {
 
   const loadAvailableUsers = async () => {
     try {
-      let users = [];
       if (userRole === 'USER') {
+        // Get user's appointments
+        const appointments = await ApiService.getClientAppointments();
+        
+        // Extract unique professional IDs from appointments
+        const professionalIds = new Set();
+        appointments.forEach(appointment => {
+          if (appointment.professional && appointment.professional.id) {
+            professionalIds.add(appointment.professional.id);
+          }
+        });
+
+        // Get all professionals
         const therapists = await ApiService.getAllTherapists();
         const nutritionists = await ApiService.getAllNutritionists();
-        users = [...therapists, ...nutritionists];
+        const allProfessionals = [...therapists, ...nutritionists];
+
+        // Filter professionals to only those the user has appointments with
+        const availableProfessionals = allProfessionals.filter(professional => 
+          professionalIds.has(professional.id)
+        );
+
+        setAvailableUsers(availableProfessionals);
       } else if (userRole === 'THERAPIST' || userRole === 'NUTRICIST') {
-        const patients = await ApiService.getUsersByRole('USER');
-        users = patients;
+        // For professionals, get their patients from appointments
+        const appointments = await ApiService.getProfessionalAppointments();
+        const uniqueClients = new Map();
+        
+        appointments.forEach(appointment => {
+          if (appointment.client && !uniqueClients.has(appointment.client.id)) {
+            uniqueClients.set(appointment.client.id, appointment.client);
+          }
+        });
+
+        setAvailableUsers(Array.from(uniqueClients.values()));
       }
-      setAvailableUsers(users);
     } catch (error) {
       console.error('Error loading available users:', error);
       setAvailableUsers([]);
@@ -347,4 +380,4 @@ const Chat = () => {
   );
 };
 
-export default Chat; //a
+export default Chat; 
