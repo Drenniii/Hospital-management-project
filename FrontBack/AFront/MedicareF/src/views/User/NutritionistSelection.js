@@ -509,6 +509,8 @@ function NutritionistSelection() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedNutritionist, setSelectedNutritionist] = useState(null);
   const [userCredits, setUserCredits] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredNutritionists, setFilteredNutritionists] = useState([]);
 
   useEffect(() => {
     const token = ApiService.getAccessToken();
@@ -519,6 +521,17 @@ function NutritionistSelection() {
     loadNutritionists();
     loadUserCredits();
   }, [history]);
+
+  useEffect(() => {
+    // Filter nutritionists based on search query
+    const filtered = nutritionists.filter(nutritionist => 
+      nutritionist.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nutritionist.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nutritionist.specialization?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nutritionist.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredNutritionists(filtered);
+  }, [searchQuery, nutritionists]);
 
   const loadNutritionists = async () => {
     try {
@@ -611,87 +624,104 @@ function NutritionistSelection() {
     <Container fluid>
       <Row className="mb-4">
         <Col md="12">
-          <h4>Select a Nutritionist</h4>
-          <p>Choose from our experienced nutrition professionals</p>
-          <div className="alert alert-info">
-            <p className="mb-0">
-              <strong>Your Balance:</strong> ${userCredits} 
-              <span className="ms-2">
-                (Each session costs $50)
-              </span>
-            </p>
-          </div>
-        </Col>
-      </Row>
-      <Row>
-        {nutritionists.length === 0 ? (
-          <Col>
-            <div className="alert alert-info">
-              No nutritionists available at the moment. Please check back later.
-            </div>
-          </Col>
-        ) : (
-          nutritionists.map((nutritionist) => (
-            <Col md="4" key={nutritionist.id} className="mb-4">
-              <Card className="h-100 shadow-sm">
-                {nutritionist.image ? (
-                  <Card.Img 
-                    variant="top" 
-                    src={nutritionist.image}
-                    style={{ height: '200px', objectFit: 'cover' }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'flex';
-                    }}
+          <Card>
+            <Card.Header>
+              <Card.Title as="h4">Select a Nutritionist</Card.Title>
+              <p className="card-category">Choose a nutritionist to book an appointment</p>
+            </Card.Header>
+            <Card.Body>
+              {/* Search Bar */}
+              <Form className="mb-4">
+                <Form.Group>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search by name, specialization, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="form-control-lg"
                   />
-                ) : null}
-                <div 
-                  style={defaultProfileStyle}
-                  className={nutritionist.image ? 'd-none' : ''}
-                >
-                  <i className="fas fa-user-md"></i>
+                </Form.Group>
+              </Form>
+
+              {loading ? (
+                <div className="text-center p-5">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
                 </div>
-                <Card.Body className="d-flex flex-column">
-                  <Card.Title className="d-flex justify-content-between align-items-center">
-                    {`${nutritionist.firstname} ${nutritionist.lastname}`}
-                  </Card.Title>
-                  <Card.Text>
-                    <strong>Email:</strong> {nutritionist.email}<br/>
-                    {nutritionist.phoneNumber && (
-                      <><strong>Phone:</strong> {nutritionist.phoneNumber}<br/></>
-                    )}
-                    {nutritionist.address && (
-                      <><strong>Address:</strong> {nutritionist.address}<br/></>
-                    )}
-                    <div className="mt-2">
-                      <strong>Session Cost:</strong> $50
-                    </div>
-                  </Card.Text>
-                  <div className="mt-auto d-flex gap-2">
-                    <Button 
-                      variant={userCredits >= 50 ? "outline-primary" : "outline-secondary"}
-                      className="flex-grow-1"
-                      onClick={() => handleBooking(nutritionist)}
-                      disabled={userCredits < 50}
-                    >
-                      {userCredits >= 50 ? (
-                        "Book Session"
-                      ) : (
-                        "Insufficient Funds"
-                      )}
-                    </Button>
-                    <Button 
-                      variant="outline-secondary"
-                      onClick={() => handleViewProfile(nutritionist)}
-                    >
-                      View Full Profile
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
-        )}
+              ) : error ? (
+                <div className="alert alert-danger">{error}</div>
+              ) : filteredNutritionists.length === 0 ? (
+                <div className="text-center p-5">
+                  <p>No nutritionists found matching your search.</p>
+                </div>
+              ) : (
+                <Row>
+                  {filteredNutritionists.map((nutritionist) => (
+                    <Col md="4" key={nutritionist.id} className="mb-4">
+                      <Card className="h-100 shadow-sm">
+                        {nutritionist.image ? (
+                          <Card.Img 
+                            variant="top" 
+                            src={nutritionist.image}
+                            style={{ height: '200px', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          style={defaultProfileStyle}
+                          className={nutritionist.image ? 'd-none' : ''}
+                        >
+                          <i className="fas fa-user-md"></i>
+                        </div>
+                        <Card.Body className="d-flex flex-column">
+                          <Card.Title className="d-flex justify-content-between align-items-center">
+                            {`${nutritionist.firstname} ${nutritionist.lastname}`}
+                          </Card.Title>
+                          <Card.Text>
+                            <strong>Email:</strong> {nutritionist.email}<br/>
+                            {nutritionist.phoneNumber && (
+                              <><strong>Phone:</strong> {nutritionist.phoneNumber}<br/></>
+                            )}
+                            {nutritionist.address && (
+                              <><strong>Address:</strong> {nutritionist.address}<br/></>
+                            )}
+                            <div className="mt-2">
+                              <strong>Session Cost:</strong> $50
+                            </div>
+                          </Card.Text>
+                          <div className="mt-auto d-flex gap-2">
+                            <Button 
+                              variant={userCredits >= 50 ? "outline-primary" : "outline-secondary"}
+                              className="flex-grow-1"
+                              onClick={() => handleBooking(nutritionist)}
+                              disabled={userCredits < 50}
+                            >
+                              {userCredits >= 50 ? (
+                                "Book Session"
+                              ) : (
+                                "Insufficient Funds"
+                              )}
+                            </Button>
+                            <Button 
+                              variant="outline-secondary"
+                              onClick={() => handleViewProfile(nutritionist)}
+                            >
+                              View Full Profile
+                            </Button>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
       </Row>
 
       <BookingModal

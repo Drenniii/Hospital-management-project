@@ -509,6 +509,8 @@ function TherapistSelection() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedTherapist, setSelectedTherapist] = useState(null);
   const [userCredits, setUserCredits] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredTherapists, setFilteredTherapists] = useState([]);
 
   useEffect(() => {
     const token = ApiService.getAccessToken();
@@ -519,6 +521,17 @@ function TherapistSelection() {
     loadTherapists();
     loadUserCredits();
   }, [history]);
+
+  useEffect(() => {
+    // Filter therapists based on search query
+    const filtered = therapists.filter(therapist => 
+      therapist.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      therapist.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      therapist.specialization?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      therapist.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredTherapists(filtered);
+  }, [searchQuery, therapists]);
 
   const loadTherapists = async () => {
     try {
@@ -614,87 +627,104 @@ function TherapistSelection() {
     <Container fluid>
       <Row className="mb-4">
         <Col md="12">
-          <h4>Select a Physical Therapist</h4>
-          <p>Choose from our experienced physical therapy professionals</p>
-          <div className="alert alert-info">
-            <p className="mb-0">
-              <strong>Your Balance:</strong> ${userCredits} 
-              <span className="ms-2">
-                (Each session costs $50)
-              </span>
-            </p>
-          </div>
-        </Col>
-      </Row>
-      <Row>
-        {therapists.length === 0 ? (
-          <Col>
-            <div className="alert alert-info">
-              No therapists available at the moment. Please check back later.
-            </div>
-          </Col>
-        ) : (
-          therapists.map((therapist) => (
-            <Col md="4" key={therapist.id} className="mb-4">
-              <Card className="h-100 shadow-sm">
-                {therapist.image ? (
-                  <Card.Img 
-                    variant="top" 
-                    src={therapist.image}
-                    style={{ height: '200px', objectFit: 'cover' }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'flex';
-                    }}
+          <Card>
+            <Card.Header>
+              <Card.Title as="h4">Select a Therapist</Card.Title>
+              <p className="card-category">Choose a therapist to book an appointment</p>
+            </Card.Header>
+            <Card.Body>
+              {/* Search Bar */}
+              <Form className="mb-4">
+                <Form.Group>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search by name, specialization, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="form-control-lg"
                   />
-                ) : null}
-                <div 
-                  style={defaultProfileStyle}
-                  className={therapist.image ? 'd-none' : ''}
-                >
-                  <i className="fas fa-user-md"></i>
+                </Form.Group>
+              </Form>
+
+              {loading ? (
+                <div className="text-center p-5">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
                 </div>
-                <Card.Body className="d-flex flex-column">
-                  <Card.Title className="d-flex justify-content-between align-items-center">
-                    {`${therapist.firstname} ${therapist.lastname}`}
-                  </Card.Title>
-                  <Card.Text>
-                    <strong>Email:</strong> {therapist.email}<br/>
-                    {therapist.phoneNumber && (
-                      <><strong>Phone:</strong> {therapist.phoneNumber}<br/></>
-                    )}
-                    {therapist.address && (
-                      <><strong>Address:</strong> {therapist.address}<br/></>
-                    )}
-                    <div className="mt-2">
-                      <strong>Session Cost:</strong> $50
-                    </div>
-                  </Card.Text>
-                  <div className="mt-auto d-flex gap-2">
-                    <Button 
-                      variant={userCredits >= 50 ? "outline-primary" : "outline-secondary"}
-                      className="flex-grow-1"
-                      onClick={() => handleBooking(therapist)}
-                      disabled={userCredits < 50}
-                    >
-                      {userCredits >= 50 ? (
-                        "Book Session"
-                      ) : (
-                        "Insufficient Funds"
-                      )}
-                    </Button>
-                    <Button 
-                      variant="outline-secondary"
-                      onClick={() => handleViewProfile(therapist)}
-                    >
-                      View Full Profile
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
-        )}
+              ) : error ? (
+                <div className="alert alert-danger">{error}</div>
+              ) : filteredTherapists.length === 0 ? (
+                <div className="text-center p-5">
+                  <p>No therapists found matching your search.</p>
+                </div>
+              ) : (
+                <Row>
+                  {filteredTherapists.map((therapist) => (
+                    <Col md="4" key={therapist.id} className="mb-4">
+                      <Card className="h-100 shadow-sm">
+                        {therapist.image ? (
+                          <Card.Img 
+                            variant="top" 
+                            src={therapist.image}
+                            style={{ height: '200px', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          style={defaultProfileStyle}
+                          className={therapist.image ? 'd-none' : ''}
+                        >
+                          <i className="fas fa-user-md"></i>
+                        </div>
+                        <Card.Body className="d-flex flex-column">
+                          <Card.Title className="d-flex justify-content-between align-items-center">
+                            {`${therapist.firstname} ${therapist.lastname}`}
+                          </Card.Title>
+                          <Card.Text>
+                            <strong>Email:</strong> {therapist.email}<br/>
+                            {therapist.phoneNumber && (
+                              <><strong>Phone:</strong> {therapist.phoneNumber}<br/></>
+                            )}
+                            {therapist.address && (
+                              <><strong>Address:</strong> {therapist.address}<br/></>
+                            )}
+                            <div className="mt-2">
+                              <strong>Session Cost:</strong> $50
+                            </div>
+                          </Card.Text>
+                          <div className="mt-auto d-flex gap-2">
+                            <Button 
+                              variant={userCredits >= 50 ? "outline-primary" : "outline-secondary"}
+                              className="flex-grow-1"
+                              onClick={() => handleBooking(therapist)}
+                              disabled={userCredits < 50}
+                            >
+                              {userCredits >= 50 ? (
+                                "Book Session"
+                              ) : (
+                                "Insufficient Funds"
+                              )}
+                            </Button>
+                            <Button 
+                              variant="outline-secondary"
+                              onClick={() => handleViewProfile(therapist)}
+                            >
+                              View Full Profile
+                            </Button>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
       </Row>
 
       <BookingModal
