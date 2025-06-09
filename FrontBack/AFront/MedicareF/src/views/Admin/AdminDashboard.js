@@ -283,4 +283,4 @@ const modalContentStyle = {
   maxWidth: "90%",
 };
 
-export default AdminDashboard;
+export default AdminDashboard; //admin
