@@ -27,7 +27,7 @@ const modalContentStyle = {
   boxShadow: "0 10px 25px rgba(0,0,0,.2)",
   animation: "modalFadeIn 0.3s ease-out",
 };
-
+//a
 // Add default profile icon styles
 const defaultProfileStyle = {
   height: '200px',
