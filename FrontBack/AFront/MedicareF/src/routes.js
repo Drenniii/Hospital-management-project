@@ -39,13 +39,6 @@ const commonRoutes = [
     layout: "/admin",
   },
   {
-    path: "/account",
-    name: "Account",
-    icon: "nc-icon nc-credit-card",
-    component: Account,
-    layout: "/admin",
-  },
-  {
     path: "/notifications",
     name: "Notifications",
     icon: "nc-icon nc-bell-55",
@@ -151,6 +144,13 @@ const userRoutes = [
     name: "Dashboard",
     icon: "nc-icon nc-chart-pie-35",
     component: UserDashboard,
+    layout: "/admin",
+  },
+  {
+    path: "/account",
+    name: "Account",
+    icon: "nc-icon nc-credit-card",
+    component: Account,
     layout: "/admin",
   },
 ];
